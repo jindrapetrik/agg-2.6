@@ -34,20 +34,45 @@ agg-java/
 
 ## Translation Status
 
-This is an ongoing translation from C++ to Java 8. The following classes have been translated:
+This is an ongoing translation from C++ to Java 8. Current progress: ~11% (27 of 286 files)
 
+**Core Classes:**
 - [x] `AggBasics` - Basic types, constants, and path command utilities
+- [x] `AggMath` - Math utility functions
+- [x] `VertexDist` - Vertex with distance calculation
+- [x] `Point2D` - 2D point utilities
+
+**Geometry Primitives:**
 - [x] `Arc` - Arc vertex generator
-- [x] `BSpline` - Bi-cubic spline interpolation
-- [x] `Arrowhead` - Arrowhead/arrowtail generator
-- [x] `Rgba` - RGBA color representation
 - [x] `Ellipse` - Ellipse vertex generator
 - [x] `RoundedRect` - Rounded rectangle generator
 - [x] `BezierArc` - Bezier arc approximation
+- [x] `BSpline` - Bi-cubic spline interpolation
+- [x] `Arrowhead` - Arrowhead/arrowtail generator
+
+**Color Support:**
+- [x] `Rgba` - Double precision RGBA color
+- [x] `Rgba8` - 8-bit RGBA color
+- [x] `GammaFunction` - Gamma correction interface
+- [x] `GammaFunctions` - Gamma implementations
+- [x] `GammaLut` - Gamma lookup table
+
+**Path Processing:**
+- [x] `PathStorage` - Path storage and manipulation
+- [x] `Curve3` - Quadratic Bezier curves
+- [x] `Curve4` - Cubic Bezier curves
+- [x] `ConvCurve` - Curve converter for paths (NEW)
+- [x] `ConvTransform` - Transformation converter (NEW)
+
+**Transformations:**
+- [x] `Transform2D` - 2D affine transformations
+- [x] `TransformedVertexSource` - Transform wrapper
+
+**Utilities:**
 - [x] `RectD` - Rectangle with double precision
-- [x] `ClipLiangBarsky` - Line clipping utilities
-- [x] `AggMath` - Math utility functions
-- [x] `VertexDist` - Vertex with distance calculation
+- [x] `ClipLiangBarsky` - Line clipping
+- [x] `BoundingRect` - Bounding rectangle calculation
+- [x] `VertexSource` - Core interface for path generators
 - [x] `GammaFunction` - Gamma correction interface
 - [x] `GammaFunctions` - Gamma correction implementations
 - [x] `VertexSource` - Interface for vertex sources
