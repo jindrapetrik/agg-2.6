@@ -39,17 +39,44 @@ public class FlashRasterizerExample {
             return;
         }
         
-        // Read first shape
-        if (!shape.readNext()) {
-            System.err.println("Error: Could not read shape data");
-            shape.close();
-            return;
+        // Process multiple shapes from file
+        int shapeCount = 0;
+        while (shape.readNext()) {
+            shapeCount++;
+            System.out.println("\nShape #" + shapeCount + ":");
+            System.out.println("  Paths: " + shape.paths());
+            
+            // Show some path information
+            for (int i = 0; i < Math.min(5, shape.paths()); i++) {
+                PathStyle style = shape.style(i);
+                System.out.printf("  Path %d: left_fill=%d, right_fill=%d, line=%d%n",
+                    i, style.leftFill, style.rightFill, style.line);
+            }
+            if (shape.paths() > 5) {
+                System.out.println("  ... (" + (shape.paths() - 5) + " more paths)");
+            }
+            
+            // Scale shape to fit window
+            shape.scale(WIDTH, HEIGHT);
+            System.out.printf("  Scaled to fit %dx%d window (scale factor: %.2f)%n", 
+                WIDTH, HEIGHT, shape.getScale());
+            
+            // Only process first shape for rendering demo
+            if (shapeCount == 1) {
+                renderShape(shape);
+            }
         }
         
-        System.out.println("Shape loaded: " + shape.paths() + " paths");
-        
-        // Scale shape to fit window
-        shape.scale(WIDTH, HEIGHT);
+        shape.close();
+        System.out.println("\nTotal shapes processed: " + shapeCount);
+        System.out.println("Done!");
+    }
+    
+    /**
+     * Render a shape to an image file.
+     */
+    private static void renderShape(CompoundShape shape) {
+        System.out.println("\nRendering shape to image...");
         
         // Create rendering buffer
         RenderingBuffer rbuf = new RenderingBuffer(WIDTH, HEIGHT, 4);
@@ -68,70 +95,68 @@ public class FlashRasterizerExample {
         }
         
         // Clear background
-        rbuf.clear(new Rgba8(255, 255, 242)); // Light yellow background
+        Rgba8 bgColor = new Rgba8(255, 255, 242); // Light yellow background
+        rbuf.clear(bgColor);
+        System.out.println("  Background cleared");
         
-        System.out.println("Rendering...");
-        
-        // Simple rendering - just draw filled paths
-        // (This is a simplified version without the full compound rasterizer)
+        // Simple rendering - draw path vertices as points
         renderSimple(rbuf, shape, colors);
         
         // Save to PPM file
         String outputFile = "flash_rasterizer_output.ppm";
         try {
             savePPM(rbuf, outputFile);
-            System.out.println("\nOutput saved to: " + outputFile);
-            System.out.println("Image size: " + WIDTH + "x" + HEIGHT + " pixels");
+            System.out.println("  Output saved to: " + outputFile);
+            System.out.println("  Image size: " + WIDTH + "x" + HEIGHT + " pixels");
+            System.out.println("  You can view this file with image viewers that support PPM format");
         } catch (IOException e) {
             System.err.println("Error saving output: " + e.getMessage());
         }
-        
-        shape.close();
-        System.out.println("\nDone!");
     }
     
     /**
-     * Simple rendering without full compound rasterizer.
-     * Just demonstrates that shapes can be loaded and transformed.
+     * Simple rendering - mark path vertices with colored pixels.
      */
     private static void renderSimple(RenderingBuffer rbuf, CompoundShape shape, Rgba8[] colors) {
-        // Create a simple rasterizer
-        RasterizerScanlineAa ras = new RasterizerScanlineAa();
-        ScanlineU8 sl = new ScanlineU8();
-        
         Transform2D scale = new Transform2D();
         ConvTransform trans = new ConvTransform(shape, scale);
+        
+        int totalVertices = 0;
         
         // Draw each path
         for (int i = 0; i < shape.paths(); i++) {
             PathStyle style = shape.style(i);
             
-            // Only draw paths with fills (skip stroke-only paths)
-            if (style.leftFill >= 0 || style.rightFill >= 0) {
-                int fillIdx = style.leftFill >= 0 ? style.leftFill : style.rightFill;
-                if (fillIdx >= 0 && fillIdx < colors.length) {
-                    ras.reset();
-                    ras.addPath(trans, style.pathId);
+            // Get color for this path
+            int fillIdx = style.leftFill >= 0 ? style.leftFill : 
+                         (style.rightFill >= 0 ? style.rightFill : 0);
+            if (fillIdx < 0 || fillIdx >= colors.length) {
+                fillIdx = 0;
+            }
+            Rgba8 color = colors[fillIdx];
+            
+            // Iterate through vertices
+            trans.rewind(style.pathId);
+            double[] xy = new double[2];
+            int cmd;
+            
+            while (!AggBasics.isStop(cmd = trans.vertex(xy))) {
+                if (AggBasics.isVertex(cmd)) {
+                    int x = (int) xy[0];
+                    int y = (int) xy[1];
                     
-                    // Simplified scanline rendering
-                    Rgba8 color = colors[fillIdx];
-                    renderScanlinesSolid(ras, sl, rbuf, color);
+                    // Draw a small cross at each vertex
+                    for (int dx = -1; dx <= 1; dx++) {
+                        for (int dy = -1; dy <= 1; dy++) {
+                            rbuf.setPixel(x + dx, y + dy, color);
+                        }
+                    }
+                    totalVertices++;
                 }
             }
         }
-    }
-    
-    /**
-     * Simplified scanline rendering.
-     */
-    private static void renderScanlinesSolid(RasterizerScanlineAa ras, 
-                                             ScanlineU8 sl, 
-                                             RenderingBuffer rbuf, 
-                                             Rgba8 color) {
-        // This is a placeholder - proper implementation would use the rasterizer
-        // For now, just mark that we would render here
-        // A full implementation would iterate through scanlines and render spans
-        System.out.print(".");
+        
+        System.out.println("  Rendered " + totalVertices + " vertices");
     }
     
     /**
