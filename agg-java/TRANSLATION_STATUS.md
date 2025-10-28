@@ -20,7 +20,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (14 files)
+### Core Classes (18 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
@@ -34,6 +34,9 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | agg_bezier_arc.h, agg_bezier_arc.cpp | BezierArc.java | ✅ Complete | Bezier arc approximation |
 | rect_base template | RectD.java | ✅ Complete | Rectangle with double precision |
 | agg_clip_liang_barsky.h | ClipLiangBarsky.java | ✅ Complete | Line clipping algorithm |
+| agg_math.h | AggMath.java | ✅ Complete | Math utility functions |
+| vertex_dist struct | VertexDist.java | ✅ Complete | Vertex with distance |
+| agg_gamma_functions.h | GammaFunction.java, GammaFunctions.java | ✅ Complete | Gamma correction |
 
 ### Examples (1 file)
 
@@ -120,11 +123,13 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~5% (14 of 286 files)**
+**Overall Progress: ~6.5% (18 of 286 files)**
 
 - Core basics: ✅ Complete
-- Geometry primitives: 🔄 In Progress (60% complete)
-- Utility classes: 🔄 In Progress (20% complete)
+- Geometry primitives: ✅ Complete (100%)
+- Utility classes: 🔄 In Progress (50% complete)
+- Math functions: ✅ Complete
+- Gamma functions: ✅ Complete
 - Path processing: ❌ Not started
 - Rendering pipeline: ❌ Not started
 - Advanced features: ❌ Not started

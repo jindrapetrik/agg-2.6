@@ -46,9 +46,13 @@ This is an ongoing translation from C++ to Java 8. The following classes have be
 - [x] `BezierArc` - Bezier arc approximation
 - [x] `RectD` - Rectangle with double precision
 - [x] `ClipLiangBarsky` - Line clipping utilities
+- [x] `AggMath` - Math utility functions
+- [x] `VertexDist` - Vertex with distance calculation
+- [x] `GammaFunction` - Gamma correction interface
+- [x] `GammaFunctions` - Gamma correction implementations
 - [ ] Additional classes in progress...
 
-**Progress: ~5% complete (11 classes from ~286 C++ files)**
+**Progress: ~6.5% complete (15 classes from ~286 C++ files)**
 
 ### Original C++ Source
 
