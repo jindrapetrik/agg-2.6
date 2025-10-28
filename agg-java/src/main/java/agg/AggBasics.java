@@ -214,4 +214,14 @@ public final class AggBasics {
     public static int uround(double v) {
         return (int)(v + 0.5);
     }
+    
+    /**
+     * Calculate alpha value from coverage area.
+     * Converts coverage area to alpha value (0-255).
+     */
+    public static int calculateAlpha(int area) {
+        int alpha = (Math.abs(area) + (POLY_SUBPIXEL_SCALE / 2)) >> (POLY_SUBPIXEL_SHIFT * 2);
+        if (alpha > 255) alpha = 255;
+        return alpha;
+    }
 }

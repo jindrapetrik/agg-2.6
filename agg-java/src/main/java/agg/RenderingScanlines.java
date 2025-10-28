@@ -8,16 +8,28 @@ package agg;
 public class RenderingScanlines {
     
     /**
-     * Render solid color scanlines.
+     * Render scanlines from rasterizer using a scanline renderer.
      */
-    public static void renderScanlines(RendererBase base, ScanlineU8 scanline, Rgba8 color) {
-        // Render scanlines with solid color
+    public static void renderScanlines(RasterizerScanlineAa ras, 
+                                      ScanlineU8 sl, 
+                                      RendererScanlineAaSolid ren) {
+        if (ras.rewindScanlines()) {
+            sl.reset(ras.minX(), ras.maxX());
+            while (ras.sweepScanline(sl)) {
+                ren.render(sl);
+            }
+        }
     }
     
     /**
-     * Render scanlines with a specific renderer.
+     * Render scanlines with solid color (convenience method).
      */
-    public static void renderScanlinesAA(RendererBase base, ScanlineU8 scanline) {
-        // Render anti-aliased scanlines
+    public static void renderScanlines(RasterizerScanlineAa ras,
+                                      ScanlineU8 sl,
+                                      RendererBase base,
+                                      Rgba8 color) {
+        RendererScanlineAaSolid ren = new RendererScanlineAaSolid(base);
+        ren.color(color);
+        renderScanlines(ras, sl, ren);
     }
 }

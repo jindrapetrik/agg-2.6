@@ -17,7 +17,7 @@ public class RasterizerCellsAa {
     private static final int CELL_BLOCK_LIMIT = 1024;
     
     private List<Cell[]> cells;
-    private List<Cell> sortedCells;
+    private List<CellAa> sortedCells;
     private Cell currentCell;
     private int minX, minY, maxX, maxY;
     private boolean sorted;
@@ -190,8 +190,8 @@ public class RasterizerCellsAa {
     }
     
     private void addCurrentCell() {
-        if ((currentCell.area | currentCell.cover) != 0) {
-            Cell cell = new Cell(curX, coverAccum, areaAccum);
+        if ((areaAccum | coverAccum) != 0) {
+            CellAa cell = new CellAa(curX, curY, coverAccum, areaAccum);
             sortedCells.add(cell);
             sorted = false;
         }
@@ -241,9 +241,11 @@ public class RasterizerCellsAa {
         
         if (sortedCells.size() == 0) return;
         
-        Collections.sort(sortedCells, new Comparator<Cell>() {
+        Collections.sort(sortedCells, new Comparator<CellAa>() {
             @Override
-            public int compare(Cell a, Cell b) {
+            public int compare(CellAa a, CellAa b) {
+                int yCompare = Integer.compare(a.y, b.y);
+                if (yCompare != 0) return yCompare;
                 return Integer.compare(a.x, b.x);
             }
         });
@@ -256,7 +258,7 @@ public class RasterizerCellsAa {
     public int maxX() { return maxX; }
     public int maxY() { return maxY; }
     
-    public List<Cell> getSortedCells() {
+    public List<CellAa> getSortedCells() {
         return sortedCells;
     }
 }

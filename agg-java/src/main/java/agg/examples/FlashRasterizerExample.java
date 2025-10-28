@@ -78,8 +78,10 @@ public class FlashRasterizerExample {
     private static void renderShape(CompoundShape shape) {
         System.out.println("\nRendering shape to image...");
         
-        // Create rendering buffer
+        // Create rendering buffer and pixel format
         RenderingBuffer rbuf = new RenderingBuffer(WIDTH, HEIGHT, 4);
+        PixFmtRgba pixf = new PixFmtRgba(rbuf);
+        RendererBase renBase = new RendererBase(pixf);
         
         // Create random colors for fills
         Rgba8[] colors = new Rgba8[100];
@@ -96,11 +98,11 @@ public class FlashRasterizerExample {
         
         // Clear background
         Rgba8 bgColor = new Rgba8(255, 255, 242); // Light yellow background
-        rbuf.clear(bgColor);
+        renBase.clear(bgColor);
         System.out.println("  Background cleared");
         
-        // Simple rendering - draw path vertices as points
-        renderSimple(rbuf, shape, colors);
+        // Render with anti-aliasing
+        renderAntiAliased(renBase, shape, colors);
         
         // Save to PPM file
         String outputFile = "flash_rasterizer_output.ppm";
@@ -115,40 +117,38 @@ public class FlashRasterizerExample {
     }
     
     /**
-     * Simple rendering - mark path vertices with colored pixels.
+     * Render shape with anti-aliased fills.
      */
-    private static void renderSimple(RenderingBuffer rbuf, CompoundShape shape, Rgba8[] colors) {
+    private static void renderAntiAliased(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
+        // Create rasterizer and scanline
+        RasterizerScanlineAa ras = new RasterizerScanlineAa();
+        ScanlineU8 sl = new ScanlineU8();
+        
         Transform2D scale = new Transform2D();
         ConvTransform trans = new ConvTransform(shape, scale);
         
-        int totalVertices = 0;
+        int pathsRendered = 0;
         
-        // Draw each path
+        // Render each path with fills
         for (int i = 0; i < shape.paths(); i++) {
             PathStyle style = shape.style(i);
             
-            // Get color for this path
-            int fillIdx = getFillIndex(style, colors.length);
-            Rgba8 color = colors[fillIdx];
-            
-            // Iterate through vertices
-            trans.rewind(style.pathId);
-            double[] xy = new double[2];
-            int cmd;
-            
-            while (!AggBasics.isStop(cmd = trans.vertex(xy))) {
-                if (AggBasics.isVertex(cmd)) {
-                    int x = (int) xy[0];
-                    int y = (int) xy[1];
-                    
-                    // Draw a small marker at each vertex
-                    drawVertexMarker(rbuf, x, y, color);
-                    totalVertices++;
-                }
+            // Only render paths with fills
+            if (style.leftFill >= 0 || style.rightFill >= 0) {
+                int fillIdx = getFillIndex(style, colors.length);
+                Rgba8 color = colors[fillIdx];
+                
+                // Add path to rasterizer
+                ras.reset();
+                ras.addPath(trans, style.pathId);
+                
+                // Render scanlines
+                RenderingScanlines.renderScanlines(ras, sl, renBase, color);
+                pathsRendered++;
             }
         }
         
-        System.out.println("  Rendered " + totalVertices + " vertices");
+        System.out.println("  Rendered " + pathsRendered + " filled paths with anti-aliasing");
     }
     
     /**
@@ -161,18 +161,6 @@ public class FlashRasterizerExample {
             fillIdx = 0;
         }
         return fillIdx;
-    }
-    
-    /**
-     * Draw a small cross marker at a vertex.
-     */
-    private static void drawVertexMarker(RenderingBuffer rbuf, int x, int y, Rgba8 color) {
-        // Draw a 3x3 marker for visibility
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                rbuf.setPixel(x + dx, y + dy, color);
-            }
-        }
     }
     
     /**
