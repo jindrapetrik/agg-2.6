@@ -125,6 +125,56 @@ public final class BoundingRect {
     }
     
     /**
+     * Calculate bounding rectangle for all paths in a compound shape.
+     * 
+     * @param vs vertex source  
+     * @param compoundShape compound shape with path information
+     * @param start starting path index
+     * @param count number of paths to process
+     * @param result array to receive bounds [x1, y1, x2, y2] (length >= 4)
+     * @return true if valid bounds were calculated, false if no vertices
+     */
+    public static boolean boundingRect(VertexSource vs, CompoundShape compoundShape,
+                                      int start, int count, double[] result) {
+        double x, y;
+        boolean first = true;
+        
+        result[0] = 1.0;
+        result[1] = 1.0;
+        result[2] = 0.0;
+        result[3] = 0.0;
+        
+        double[] xy = new double[2];
+        
+        for (int i = 0; i < count; i++) {
+            vs.rewind(compoundShape.getPathId(start + i));
+            int cmd;
+            
+            while (!isStop(cmd = vs.vertex(xy))) {
+                if (isVertex(cmd)) {
+                    x = xy[0];
+                    y = xy[1];
+                    
+                    if (first) {
+                        result[0] = x;
+                        result[1] = y;
+                        result[2] = x;
+                        result[3] = y;
+                        first = false;
+                    } else {
+                        if (x < result[0]) result[0] = x;
+                        if (y < result[1]) result[1] = y;
+                        if (x > result[2]) result[2] = x;
+                        if (y > result[3]) result[3] = y;
+                    }
+                }
+            }
+        }
+        
+        return result[0] <= result[2] && result[1] <= result[3];
+    }
+    
+    /**
      * Calculate bounding rectangle and store in RectD object.
      * 
      * @param vs vertex source

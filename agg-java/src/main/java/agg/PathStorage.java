@@ -53,6 +53,25 @@ public class PathStorage implements VertexSource {
     }
     
     /**
+     * Start a new path.
+     * Returns the path ID which can be used to reference this path later.
+     * 
+     * @return path ID (index of current position)
+     */
+    public int startNewPath() {
+        if (!commands.isEmpty()) {
+            int lastCmd = commands.get(commands.size() - 1);
+            if (!isStop(lastCmd)) {
+                // Add stop command to end previous path
+                vertices.add(0.0);
+                vertices.add(0.0);
+                commands.add(PATH_CMD_STOP);
+            }
+        }
+        return commands.size();
+    }
+    
+    /**
      * Get total number of vertices.
      * 
      * @return vertex count

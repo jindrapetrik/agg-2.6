@@ -261,6 +261,18 @@ public class Transform2D {
                Math.abs(ty) <= epsilon;
     }
     
+    /**
+     * Get the scale factor of this transformation.
+     * Calculates the average of x and y scale components.
+     * 
+     * @return scale factor
+     */
+    public double getScale() {
+        double x = 0.707106781 * sx + 0.707106781 * shx;
+        double y = 0.707106781 * shy + 0.707106781 * sy;
+        return Math.sqrt(x * x + y * y);
+    }
+    
     @Override
     public String toString() {
         return String.format("Transform2D[%.4f %.4f %.4f %.4f %.4f %.4f]",
