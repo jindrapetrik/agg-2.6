@@ -12,9 +12,9 @@ This project represents the initial phase of translating the Anti-Grain Geometry
 - **Total C++ files**: 286
 
 ### Current Java Translation
-- **Java source files**: 15
-- **Translation progress**: ~6.5% (18 C++ files → 15 Java files)
-- **JAR artifact**: agg-java-2.6.0.jar
+- **Java source files**: 18
+- **Translation progress**: ~7.5% (21 C++ files → 18 Java files)
+- **JAR artifact**: agg-java-2.6.0.jar (30KB)
 
 ## Completed Translations
 
