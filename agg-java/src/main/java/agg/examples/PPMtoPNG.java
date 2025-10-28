@@ -20,53 +20,55 @@ public class PPMtoPNG {
         
         System.out.println("Converting " + inputFile + " to " + outputFile);
         
-        // Read PPM
-        DataInputStream dis = new DataInputStream(new FileInputStream(inputFile));
-        
-        // Read header
-        String magic = readLine(dis);
-        if (!magic.equals("P6")) {
-            System.err.println("Not a binary PPM file (P6 format)");
-            return;
-        }
-        
-        // Skip comments
-        String line;
-        do {
-            line = readLine(dis);
-        } while (line.startsWith("#"));
-        
-        // Parse dimensions
-        String[] dims = line.split("\\s+");
-        int width = Integer.parseInt(dims[0]);
-        int height = Integer.parseInt(dims[1]);
-        
-        // Read max value
-        String maxVal = readLine(dis);
-        
-        System.out.println("Image: " + width + "x" + height);
-        
-        // Read pixel data
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        byte[] rgb = new byte[3];
-        
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                dis.readFully(rgb);
-                int r = rgb[0] & 0xFF;
-                int g = rgb[1] & 0xFF;
-                int b = rgb[2] & 0xFF;
-                int color = (r << 16) | (g << 8) | b;
-                image.setRGB(x, y, color);
+        // Read PPM with try-with-resources for proper cleanup
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(inputFile))) {
+            // Read header
+            String magic = readLine(dis);
+            if (!magic.equals("P6")) {
+                System.err.println("Not a binary PPM file (P6 format)");
+                return;
             }
+            
+            // Skip comments
+            String line;
+            do {
+                line = readLine(dis);
+            } while (line.startsWith("#"));
+            
+            // Parse dimensions with validation
+            String[] dims = line.split("\\s+");
+            if (dims.length < 2) {
+                System.err.println("Invalid PPM header: missing dimensions");
+                return;
+            }
+            int width = Integer.parseInt(dims[0]);
+            int height = Integer.parseInt(dims[1]);
+            
+            // Read max value
+            String maxVal = readLine(dis);
+            
+            System.out.println("Image: " + width + "x" + height);
+            
+            // Read pixel data
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            byte[] rgb = new byte[3];
+            
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    dis.readFully(rgb);
+                    int r = rgb[0] & 0xFF;
+                    int g = rgb[1] & 0xFF;
+                    int b = rgb[2] & 0xFF;
+                    int color = (r << 16) | (g << 8) | b;
+                    image.setRGB(x, y, color);
+                }
+            }
+            
+            // Write PNG
+            ImageIO.write(image, "PNG", new File(outputFile));
+            
+            System.out.println("Conversion complete!");
         }
-        
-        dis.close();
-        
-        // Write PNG
-        ImageIO.write(image, "PNG", new File(outputFile));
-        
-        System.out.println("Conversion complete!");
     }
     
     private static String readLine(DataInputStream dis) throws IOException {

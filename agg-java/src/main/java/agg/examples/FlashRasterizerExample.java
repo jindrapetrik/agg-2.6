@@ -128,11 +128,7 @@ public class FlashRasterizerExample {
             PathStyle style = shape.style(i);
             
             // Get color for this path
-            int fillIdx = style.leftFill >= 0 ? style.leftFill : 
-                         (style.rightFill >= 0 ? style.rightFill : 0);
-            if (fillIdx < 0 || fillIdx >= colors.length) {
-                fillIdx = 0;
-            }
+            int fillIdx = getFillIndex(style, colors.length);
             Rgba8 color = colors[fillIdx];
             
             // Iterate through vertices
@@ -145,18 +141,38 @@ public class FlashRasterizerExample {
                     int x = (int) xy[0];
                     int y = (int) xy[1];
                     
-                    // Draw a small cross at each vertex
-                    for (int dx = -1; dx <= 1; dx++) {
-                        for (int dy = -1; dy <= 1; dy++) {
-                            rbuf.setPixel(x + dx, y + dy, color);
-                        }
-                    }
+                    // Draw a small marker at each vertex
+                    drawVertexMarker(rbuf, x, y, color);
                     totalVertices++;
                 }
             }
         }
         
         System.out.println("  Rendered " + totalVertices + " vertices");
+    }
+    
+    /**
+     * Get fill index from path style.
+     */
+    private static int getFillIndex(PathStyle style, int maxColors) {
+        int fillIdx = style.leftFill >= 0 ? style.leftFill : 
+                     (style.rightFill >= 0 ? style.rightFill : 0);
+        if (fillIdx < 0 || fillIdx >= maxColors) {
+            fillIdx = 0;
+        }
+        return fillIdx;
+    }
+    
+    /**
+     * Draw a small cross marker at a vertex.
+     */
+    private static void drawVertexMarker(RenderingBuffer rbuf, int x, int y, Rgba8 color) {
+        // Draw a 3x3 marker for visibility
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                rbuf.setPixel(x + dx, y + dy, color);
+            }
+        }
     }
     
     /**
