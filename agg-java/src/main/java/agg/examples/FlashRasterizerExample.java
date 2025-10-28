@@ -39,7 +39,7 @@ public class FlashRasterizerExample {
             return;
         }
         
-        // Create rendering buffer and pixel format for all shapes
+        // Create rendering buffer and pixel format for first shape only
         RenderingBuffer rbuf = new RenderingBuffer(WIDTH, HEIGHT, 4);
         PixFmtRgba pixf = new PixFmtRgba(rbuf);
         RendererBase renBase = new RendererBase(pixf);
@@ -62,10 +62,10 @@ public class FlashRasterizerExample {
             colors[i] = colors[i].premultiply();
         }
         
-        // Process and render all shapes from file
+        // Process and render ONLY THE FIRST shape from file
         int shapeCount = 0;
         int totalPathsRendered = 0;
-        while (shape.readNext()) {
+        if (shape.readNext()) {
             shapeCount++;
             System.out.println("\nShape #" + shapeCount + ":");
             System.out.println("  Paths: " + shape.paths());
@@ -85,23 +85,23 @@ public class FlashRasterizerExample {
             System.out.printf("  Scaled to fit %dx%d window (scale factor: %.2f)%n", 
                 WIDTH, HEIGHT, shape.getScale());
             
-            // Render this shape
-            int pathsRendered = renderShapeToBuffer(renBase, shape, colors);
+            // Render this shape using left/right fills
+            int pathsRendered = renderShapeWithFills(renBase, shape, colors);
             totalPathsRendered += pathsRendered;
-            System.out.println("  Rendered " + pathsRendered + " filled paths");
+            System.out.println("  Rendered " + pathsRendered + " paths with fills");
         }
         
         shape.close();
         
-        // Save the combined output
-        System.out.println("\nSaving combined output...");
+        // Save the output
+        System.out.println("\nSaving output...");
         String outputFile = "flash_rasterizer_output.ppm";
         try {
             savePPM(rbuf, outputFile);
             System.out.println("Output saved to: " + outputFile);
             System.out.println("Image size: " + WIDTH + "x" + HEIGHT + " pixels");
             System.out.println("Total shapes rendered: " + shapeCount);
-            System.out.println("Total filled paths rendered: " + totalPathsRendered);
+            System.out.println("Total paths rendered: " + totalPathsRendered);
         } catch (IOException e) {
             System.err.println("Error saving output: " + e.getMessage());
         }
@@ -110,10 +110,10 @@ public class FlashRasterizerExample {
     }
     
     /**
-     * Render a shape to an existing rendering buffer.
+     * Render a shape with proper left/right fill handling.
      * Returns the number of paths rendered.
      */
-    private static int renderShapeToBuffer(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
+    private static int renderShapeWithFills(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
         // Create rasterizer and scanline
         RasterizerScanlineAa ras = new RasterizerScanlineAa();
         ScanlineU8 sl = new ScanlineU8();
@@ -123,13 +123,25 @@ public class FlashRasterizerExample {
         
         int pathsRendered = 0;
         
-        // Render each path with fills
+        // Render each path - use leftFill and rightFill to determine color
         for (int i = 0; i < shape.paths(); i++) {
             PathStyle style = shape.style(i);
             
-            // Only render paths with fills
-            if (style.leftFill >= 0 || style.rightFill >= 0) {
-                int fillIdx = getFillIndex(style, colors.length);
+            // Determine which fill to use (prefer leftFill, fallback to rightFill)
+            int fillIdx = -1;
+            if (style.leftFill >= 0) {
+                fillIdx = style.leftFill;
+            } else if (style.rightFill >= 0) {
+                fillIdx = style.rightFill;
+            }
+            
+            // Only render paths that have a fill
+            if (fillIdx >= 0) {
+                // Ensure fillIdx is within color array bounds
+                if (fillIdx >= colors.length) {
+                    fillIdx = fillIdx % colors.length;
+                }
+                
                 Rgba8 color = colors[fillIdx];
                 
                 // Add path to rasterizer
@@ -143,18 +155,6 @@ public class FlashRasterizerExample {
         }
         
         return pathsRendered;
-    }
-    
-    /**
-     * Get fill index from path style.
-     */
-    private static int getFillIndex(PathStyle style, int maxColors) {
-        int fillIdx = style.leftFill >= 0 ? style.leftFill : 
-                     (style.rightFill >= 0 ? style.rightFill : 0);
-        if (fillIdx < 0 || fillIdx >= maxColors) {
-            fillIdx = 0;
-        }
-        return fillIdx;
     }
     
     /**
