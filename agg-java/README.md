@@ -34,12 +34,13 @@ agg-java/
 
 ## Translation Status
 
-This is an ongoing translation from C++ to Java 8. Current progress: ~11% (27 of 286 files)
+This is an ongoing translation from C++ to Java 8. Current progress: ~14% (36 of 286 files)
 
 **Core Classes:**
 - [x] `AggBasics` - Basic types, constants, and path command utilities
 - [x] `AggMath` - Math utility functions
 - [x] `VertexDist` - Vertex with distance calculation
+- [x] `VertexSequence` - Vertex sequence container
 - [x] `Point2D` - 2D point utilities
 
 **Geometry Primitives:**
@@ -49,6 +50,8 @@ This is an ongoing translation from C++ to Java 8. Current progress: ~11% (27 of
 - [x] `BezierArc` - Bezier arc approximation
 - [x] `BSpline` - Bi-cubic spline interpolation
 - [x] `Arrowhead` - Arrowhead/arrowtail generator
+- [x] `Polygon` - Regular polygon generator (NEW)
+- [x] `Star` - Star shape generator (NEW)
 
 **Color Support:**
 - [x] `Rgba` - Double precision RGBA color
@@ -61,8 +64,11 @@ This is an ongoing translation from C++ to Java 8. Current progress: ~11% (27 of
 - [x] `PathStorage` - Path storage and manipulation
 - [x] `Curve3` - Quadratic Bezier curves
 - [x] `Curve4` - Cubic Bezier curves
-- [x] `ConvCurve` - Curve converter for paths (NEW)
-- [x] `ConvTransform` - Transformation converter (NEW)
+- [x] `ConvCurve` - Curve converter for paths
+- [x] `ConvTransform` - Transformation converter
+- [x] `ConvDash` - Dash pattern generator (NEW)
+- [x] `ConvMarker` - Marker placement converter (NEW)
+- [x] `ConvConcat` - Concatenates vertex sources (NEW)
 
 **Transformations:**
 - [x] `Transform2D` - 2D affine transformations
@@ -73,11 +79,9 @@ This is an ongoing translation from C++ to Java 8. Current progress: ~11% (27 of
 - [x] `ClipLiangBarsky` - Line clipping
 - [x] `BoundingRect` - Bounding rectangle calculation
 - [x] `VertexSource` - Core interface for path generators
-- [x] `GammaFunction` - Gamma correction interface
-- [x] `GammaFunctions` - Gamma correction implementations
-- [x] `VertexSource` - Interface for vertex sources
-- [x] `BoundingRect` - Bounding rectangle utilities
-- [x] `Point2D` - 2D point utility class
+- [x] `LineCapE` - Line cap styles enum (NEW)
+- [x] `LineJoinE` - Line join styles enum (NEW)
+- [x] `InnerJoinE` - Inner join styles enum (NEW)
 - [x] `Rgba8` - 8-bit RGBA color (0-255 components)
 - [x] `Transform2D` - 2D affine transformation matrix
 - [x] `GammaLut` - Gamma correction lookup table

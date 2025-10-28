@@ -20,7 +20,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (30 files)
+### Core Classes (36 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
@@ -37,6 +37,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | agg_clip_liang_barsky.h | ClipLiangBarsky.java | ✅ Complete | Line clipping algorithm |
 | agg_math.h | AggMath.java | ✅ Complete | Math utility functions |
 | vertex_dist struct | VertexDist.java | ✅ Complete | Vertex with distance |
+| vertex_sequence template | VertexSequence.java | ✅ Complete | Vertex sequence container |
 | agg_gamma_functions.h | GammaFunction.java, GammaFunctions.java | ✅ Complete | Gamma correction |
 | agg_gamma_lut.h | GammaLut.java | ✅ Complete | Gamma lookup table |
 | vertex_source concept | VertexSource.java | ✅ Complete | Vertex source interface |
@@ -49,6 +50,14 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | agg_curves.h | Curve4.java | ✅ Complete | Cubic Bezier curve |
 | agg_conv_curve.h | ConvCurve.java | ✅ Complete | Converts curves to line segments |
 | agg_conv_transform.h | ConvTransform.java | ✅ Complete | Applies transformations to paths |
+| agg_conv_dash.h | ConvDash.java | ⚠️ Simplified | Dash pattern generator |
+| agg_conv_marker.h | ConvMarker.java | ⚠️ Simplified | Marker placement converter |
+| agg_conv_concat.h | ConvConcat.java | ✅ Complete | Concatenates vertex sources |
+| N/A | Polygon.java | ✅ Complete | Regular polygon generator |
+| N/A | Star.java | ✅ Complete | Star shape generator |
+| line_cap enum | LineCapE.java | ✅ Complete | Line cap styles |
+| line_join enum | LineJoinE.java | ✅ Complete | Line join styles |
+| inner_join enum | InnerJoinE.java | ✅ Complete | Inner join styles |
 
 ### Examples (1 file)
 
@@ -135,7 +144,7 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~11% (30 of 286 files)**
+**Overall Progress: ~14% (36 of 286 files)**
 
 - Core basics: ✅ Complete
 - Geometry primitives: ✅ Complete (100%)
@@ -148,6 +157,8 @@ Java translation may have different performance characteristics:
 - Bounding utilities: ✅ Complete
 - Path storage: ✅ Basic support (PathStorage)
 - Curve classes: ✅ Complete (Curve3, Curve4, ConvCurve)
+- Path converters: ✅ Basic support (ConvDash, ConvMarker, ConvConcat)
+- Line styles: ✅ Complete (LineCapE, LineJoinE, InnerJoinE)
 - Rendering pipeline: ❌ Not started
 - Advanced features: ❌ Not started
 
