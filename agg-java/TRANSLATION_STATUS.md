@@ -20,7 +20,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (10 files)
+### Core Classes (14 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
@@ -31,6 +31,9 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | agg_color_rgba.h | Rgba.java | ⚠️ Simplified | Basic RGBA color (simplified) |
 | agg_ellipse.h | Ellipse.java | ✅ Complete | Ellipse vertex generator |
 | agg_rounded_rect.h, agg_rounded_rect.cpp | RoundedRect.java | ✅ Complete | Rounded rectangle generator |
+| agg_bezier_arc.h, agg_bezier_arc.cpp | BezierArc.java | ✅ Complete | Bezier arc approximation |
+| rect_base template | RectD.java | ✅ Complete | Rectangle with double precision |
+| agg_clip_liang_barsky.h | ClipLiangBarsky.java | ✅ Complete | Line clipping algorithm |
 
 ### Examples (1 file)
 
@@ -49,10 +52,15 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ### High Priority - Core Geometry Classes
 
-- [ ] agg_bezier_arc.h/cpp - Bezier arc approximation
+- [x] agg_bezier_arc.h/cpp - Bezier arc approximation
 - [ ] agg_curves.h/cpp - Curve classes
 - [x] agg_ellipse.h - Ellipse generator
 - [x] agg_rounded_rect.h/cpp - Rounded rectangle
+
+### High Priority - Utility Classes
+
+- [x] rect_base template - Rectangle class (RectD)
+- [x] agg_clip_liang_barsky.h - Line clipping
 
 ### Medium Priority - Path Processing
 
@@ -112,10 +120,11 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~3.5% (10 of 286 files)**
+**Overall Progress: ~5% (14 of 286 files)**
 
 - Core basics: ✅ Complete
-- Geometry primitives: 🔄 In Progress (40% complete)
+- Geometry primitives: 🔄 In Progress (60% complete)
+- Utility classes: 🔄 In Progress (20% complete)
 - Path processing: ❌ Not started
 - Rendering pipeline: ❌ Not started
 - Advanced features: ❌ Not started

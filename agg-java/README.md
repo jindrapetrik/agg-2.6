@@ -43,9 +43,12 @@ This is an ongoing translation from C++ to Java 8. The following classes have be
 - [x] `Rgba` - RGBA color representation
 - [x] `Ellipse` - Ellipse vertex generator
 - [x] `RoundedRect` - Rounded rectangle generator
+- [x] `BezierArc` - Bezier arc approximation
+- [x] `RectD` - Rectangle with double precision
+- [x] `ClipLiangBarsky` - Line clipping utilities
 - [ ] Additional classes in progress...
 
-**Progress: ~3% complete (8 classes from ~286 C++ files)**
+**Progress: ~5% complete (11 classes from ~286 C++ files)**
 
 ### Original C++ Source
 
