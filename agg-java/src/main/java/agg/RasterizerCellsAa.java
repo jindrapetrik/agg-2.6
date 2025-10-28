@@ -182,16 +182,15 @@ public class RasterizerCellsAa {
         if (currentCell.x != x || curY != y) {
             addCurrentCell();
             currentCell.setCoord(x);
+            currentCell.setCover(0, 0);
             curX = x;
             curY = y;
-            coverAccum = 0;
-            areaAccum = 0;
         }
     }
     
     private void addCurrentCell() {
-        if ((areaAccum | coverAccum) != 0) {
-            CellAa cell = new CellAa(curX, curY, coverAccum, areaAccum);
+        if ((currentCell.area | currentCell.cover) != 0) {
+            CellAa cell = new CellAa(curX, curY, currentCell.cover, currentCell.area);
             sortedCells.add(cell);
             sorted = false;
         }
@@ -199,37 +198,28 @@ public class RasterizerCellsAa {
     
     private void renderHLine(int ey1, int ey2, int x1, int fy1, int fy2) {
         int ex1 = x1 >> AggBasics.POLY_SUBPIXEL_SHIFT;
-        int ex2 = x1 >> AggBasics.POLY_SUBPIXEL_SHIFT;
         int fx1 = x1 & AggBasics.POLY_SUBPIXEL_MASK;
-        int fx2 = x1 & AggBasics.POLY_SUBPIXEL_MASK;
         
         int delta;
-        int p, lift, mod, rem;
         
-        if (ey1 < ey2) {
-            p = (AggBasics.POLY_SUBPIXEL_SCALE - fy1) * (ex2 - ex1);
-            delta = p / (ey2 - ey1);
-            mod = p % (ey2 - ey1);
-            
-            if (mod < 0) {
-                delta--;
-                mod += (ey2 - ey1);
-            }
-            
-            x1 += delta;
-            setCurrentCell(x1 >> AggBasics.POLY_SUBPIXEL_SHIFT, ey1);
-            ey1++;
-            
-            while (ey1 != ey2) {
-                delta = (ex2 - ex1) * AggBasics.POLY_SUBPIXEL_SCALE / (ey2 - ey1);
-                x1 += delta;
-                setCurrentCell(x1 >> AggBasics.POLY_SUBPIXEL_SHIFT, ey1);
-                ey1++;
-            }
+        // Same Y - single scanline
+        if (fy1 == fy2) {
+            setCurrentCell(ex1, ey1);
+            return;
         }
         
-        coverAccum += fy2 - fy1;
-        areaAccum += (fx1 + fx2) * (fy2 - fy1);
+        // All in same cell
+        if (ey1 == ey2) {
+            delta = fy2 - fy1;
+            currentCell.cover += delta;
+            currentCell.area += (fx1 + fx1) * delta;
+            return;
+        }
+        
+        // Multiple scanlines - simplified for now
+        delta = fy2 - fy1;
+        currentCell.cover += delta;
+        currentCell.area += (fx1 + fx1) * delta;
     }
     
     public void sortCells() {
