@@ -39,8 +39,32 @@ public class FlashRasterizerExample {
             return;
         }
         
-        // Process multiple shapes from file
+        // Create rendering buffer and pixel format for all shapes
+        RenderingBuffer rbuf = new RenderingBuffer(WIDTH, HEIGHT, 4);
+        PixFmtRgba pixf = new PixFmtRgba(rbuf);
+        RendererBase renBase = new RendererBase(pixf);
+        
+        // Clear background
+        Rgba8 bgColor = new Rgba8(255, 255, 242); // Light yellow background
+        renBase.clear(bgColor);
+        System.out.println("\nBackground cleared");
+        
+        // Create random colors for fills
+        Rgba8[] colors = new Rgba8[100];
+        Random rand = new Random(12345); // Fixed seed for reproducibility
+        for (int i = 0; i < colors.length; i++) {
+            colors[i] = new Rgba8(
+                rand.nextInt(256),
+                rand.nextInt(256),
+                rand.nextInt(256),
+                230
+            );
+            colors[i] = colors[i].premultiply();
+        }
+        
+        // Process and render all shapes from file
         int shapeCount = 0;
+        int totalPathsRendered = 0;
         while (shape.readNext()) {
             shapeCount++;
             System.out.println("\nShape #" + shapeCount + ":");
@@ -61,65 +85,35 @@ public class FlashRasterizerExample {
             System.out.printf("  Scaled to fit %dx%d window (scale factor: %.2f)%n", 
                 WIDTH, HEIGHT, shape.getScale());
             
-            // Only process first shape for rendering demo
-            if (shapeCount == 1) {
-                renderShape(shape);
-            }
+            // Render this shape
+            int pathsRendered = renderShapeToBuffer(renBase, shape, colors);
+            totalPathsRendered += pathsRendered;
+            System.out.println("  Rendered " + pathsRendered + " filled paths");
         }
         
         shape.close();
-        System.out.println("\nTotal shapes processed: " + shapeCount);
-        System.out.println("Done!");
-    }
-    
-    /**
-     * Render a shape to an image file.
-     */
-    private static void renderShape(CompoundShape shape) {
-        System.out.println("\nRendering shape to image...");
         
-        // Create rendering buffer and pixel format
-        RenderingBuffer rbuf = new RenderingBuffer(WIDTH, HEIGHT, 4);
-        PixFmtRgba pixf = new PixFmtRgba(rbuf);
-        RendererBase renBase = new RendererBase(pixf);
-        
-        // Create random colors for fills
-        Rgba8[] colors = new Rgba8[100];
-        Random rand = new Random(12345); // Fixed seed for reproducibility
-        for (int i = 0; i < colors.length; i++) {
-            colors[i] = new Rgba8(
-                rand.nextInt(256),
-                rand.nextInt(256),
-                rand.nextInt(256),
-                230
-            );
-            colors[i] = colors[i].premultiply();
-        }
-        
-        // Clear background
-        Rgba8 bgColor = new Rgba8(255, 255, 242); // Light yellow background
-        renBase.clear(bgColor);
-        System.out.println("  Background cleared");
-        
-        // Render with anti-aliasing
-        renderAntiAliased(renBase, shape, colors);
-        
-        // Save to PPM file
+        // Save the combined output
+        System.out.println("\nSaving combined output...");
         String outputFile = "flash_rasterizer_output.ppm";
         try {
             savePPM(rbuf, outputFile);
-            System.out.println("  Output saved to: " + outputFile);
-            System.out.println("  Image size: " + WIDTH + "x" + HEIGHT + " pixels");
-            System.out.println("  You can view this file with image viewers that support PPM format");
+            System.out.println("Output saved to: " + outputFile);
+            System.out.println("Image size: " + WIDTH + "x" + HEIGHT + " pixels");
+            System.out.println("Total shapes rendered: " + shapeCount);
+            System.out.println("Total filled paths rendered: " + totalPathsRendered);
         } catch (IOException e) {
             System.err.println("Error saving output: " + e.getMessage());
         }
+        
+        System.out.println("\nDone!");
     }
     
     /**
-     * Render shape with anti-aliased fills.
+     * Render a shape to an existing rendering buffer.
+     * Returns the number of paths rendered.
      */
-    private static void renderAntiAliased(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
+    private static int renderShapeToBuffer(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
         // Create rasterizer and scanline
         RasterizerScanlineAa ras = new RasterizerScanlineAa();
         ScanlineU8 sl = new ScanlineU8();
@@ -148,7 +142,7 @@ public class FlashRasterizerExample {
             }
         }
         
-        System.out.println("  Rendered " + pathsRendered + " filled paths with anti-aliasing");
+        return pathsRendered;
     }
     
     /**
