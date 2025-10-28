@@ -274,7 +274,7 @@ public class PathStorage implements VertexSource {
     
     @Override
     public void rewind(int pathId) {
-        iteratorIndex = 0;
+        iteratorIndex = pathId;
     }
     
     @Override
