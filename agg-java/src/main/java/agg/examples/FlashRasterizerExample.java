@@ -86,9 +86,9 @@ public class FlashRasterizerExample {
                 WIDTH, HEIGHT, shape.getScale());
             
             // Render this shape using left/right fills
-            int pathsRendered = renderShapeWithFills(renBase, shape, colors);
-            totalPathsRendered += pathsRendered;
-            System.out.println("  Rendered " + pathsRendered + " paths with fills");
+            int fillsRendered = renderShapeWithFills(renBase, shape, colors);
+            totalPathsRendered += fillsRendered;
+            System.out.println("  Rendered " + fillsRendered + " fill regions");
         }
         
         shape.close();
@@ -101,7 +101,7 @@ public class FlashRasterizerExample {
             System.out.println("Output saved to: " + outputFile);
             System.out.println("Image size: " + WIDTH + "x" + HEIGHT + " pixels");
             System.out.println("Total shapes rendered: " + shapeCount);
-            System.out.println("Total paths rendered: " + totalPathsRendered);
+            System.out.println("Total fill regions rendered: " + totalPathsRendered);
         } catch (IOException e) {
             System.err.println("Error saving output: " + e.getMessage());
         }
@@ -111,7 +111,9 @@ public class FlashRasterizerExample {
     
     /**
      * Render a shape with proper left/right fill handling.
-     * Returns the number of paths rendered.
+     * For compound shapes with edge-based fills, this attempts to group
+     * paths by fill index and render them together.
+     * Returns the number of fills rendered.
      */
     private static int renderShapeWithFills(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
         // Create rasterizer and scanline
@@ -121,40 +123,66 @@ public class FlashRasterizerExample {
         Transform2D scale = new Transform2D();
         ConvTransform trans = new ConvTransform(shape, scale);
         
-        int pathsRendered = 0;
+        // Group paths by their fill indices
+        // For proper compound rendering, we need to add ALL paths that border a fill region
+        java.util.Map<Integer, java.util.List<Integer>> leftFillPaths = new java.util.HashMap<>();
+        java.util.Map<Integer, java.util.List<Integer>> rightFillPaths = new java.util.HashMap<>();
         
-        // Render each path - use leftFill and rightFill to determine color
         for (int i = 0; i < shape.paths(); i++) {
             PathStyle style = shape.style(i);
             
-            // Determine which fill to use (prefer leftFill, fallback to rightFill)
-            int fillIdx = -1;
             if (style.leftFill >= 0) {
-                fillIdx = style.leftFill;
-            } else if (style.rightFill >= 0) {
-                fillIdx = style.rightFill;
+                leftFillPaths.computeIfAbsent(style.leftFill, k -> new java.util.ArrayList<>()).add(i);
             }
-            
-            // Only render paths that have a fill
-            if (fillIdx >= 0) {
-                // Ensure fillIdx is within color array bounds
-                if (fillIdx >= colors.length) {
-                    fillIdx = fillIdx % colors.length;
-                }
-                
-                Rgba8 color = colors[fillIdx];
-                
-                // Add path to rasterizer
-                ras.reset();
-                ras.addPath(trans, style.pathId);
-                
-                // Render scanlines
-                RenderingScanlines.renderScanlines(ras, sl, renBase, color);
-                pathsRendered++;
+            if (style.rightFill >= 0) {
+                rightFillPaths.computeIfAbsent(style.rightFill, k -> new java.util.ArrayList<>()).add(i);
             }
         }
         
-        return pathsRendered;
+        // Find all unique fill indices
+        java.util.Set<Integer> allFills = new java.util.HashSet<>();
+        allFills.addAll(leftFillPaths.keySet());
+        allFills.addAll(rightFillPaths.keySet());
+        
+        int fillsRendered = 0;
+        
+        // Render each fill region by adding all its bordering paths
+        for (Integer fillIdx : allFills) {
+            if (fillIdx < 0) continue;
+            
+            // Ensure fillIdx is within color array bounds
+            int colorIdx = fillIdx >= colors.length ? fillIdx % colors.length : fillIdx;
+            Rgba8 color = colors[colorIdx];
+            
+            ras.reset();
+            
+            // Add all paths where this fill is on the LEFT (paths go counter-clockwise around fill)
+            java.util.List<Integer> leftPaths = leftFillPaths.get(fillIdx);
+            if (leftPaths != null) {
+                for (Integer pathIdx : leftPaths) {
+                    PathStyle style = shape.style(pathIdx);
+                    ras.addPath(trans, style.pathId);
+                }
+            }
+            
+            // Add all paths where this fill is on the RIGHT (paths go clockwise around fill)
+            // Note: For proper compound rasterization, we'd need to reverse these paths
+            // For now, just add them as-is (this is a simplification)
+            java.util.List<Integer> rightPaths = rightFillPaths.get(fillIdx);
+            if (rightPaths != null) {
+                for (Integer pathIdx : rightPaths) {
+                    PathStyle style = shape.style(pathIdx);
+                    // In a full implementation, we'd reverse the path direction here
+                    ras.addPath(trans, style.pathId);
+                }
+            }
+            
+            // Render this fill region
+            RenderingScanlines.renderScanlines(ras, sl, renBase, color);
+            fillsRendered++;
+        }
+        
+        return fillsRendered;
     }
     
     /**
