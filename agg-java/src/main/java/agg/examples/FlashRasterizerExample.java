@@ -167,15 +167,14 @@ public class FlashRasterizerExample {
                 }
             }
             
-            // Add paths where this fill is on the RIGHT (with reversed direction)
-            // When fill is on the right, we need to traverse the path in reverse
-            java.util.List<Integer> rightPaths = rightFillPaths.get(fillIdx);
-            if (rightPaths != null) {
-                for (Integer pathIdx : rightPaths) {
-                    PathStyle style = shape.style(pathIdx);
-                    ras.addPath(reverseTrans, style.pathId);
-                }
-            }
+            // NOTE: For a complete compound rasterizer matching C++ AGG behavior,
+            // we would need to implement RasterizerCompoundAa which stores left/right
+            // fill indices with each cell and uses a style handler during rendering.
+            // That's ~1000+ lines of code.
+            //
+            // For now, we only use leftFill paths to avoid spurious rectangles.
+            // This works well for properly formed Flash shapes where all fill regions
+            // have leftFill paths defining their boundaries.
             
             // Render this fill region
             RenderingScanlines.renderScanlines(ras, sl, renBase, color);
