@@ -57,9 +57,12 @@ This is an ongoing translation from C++ to Java 8. The following classes have be
 - [x] `Transform2D` - 2D affine transformation matrix
 - [x] `GammaLut` - Gamma correction lookup table
 - [x] `TransformedVertexSource` - Applies transformation to vertex source
+- [x] `PathStorage` - Path storage and manipulation container
+- [x] `Curve3` - Quadratic Bezier curve (3 control points)
+- [x] `Curve4` - Cubic Bezier curve (4 control points)
 - [ ] Additional classes in progress...
 
-**Progress: ~9% complete (22 classes from ~286 C++ files)**
+**Progress: ~10% complete (25 classes from ~286 C++ files)**
 
 ### Original C++ Source
 

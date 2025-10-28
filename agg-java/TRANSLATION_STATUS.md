@@ -20,7 +20,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (25 files)
+### Core Classes (28 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
@@ -44,6 +44,9 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | N/A | Point2D.java | ✅ Complete | 2D point utility class |
 | agg_trans_affine.h | Transform2D.java | ⚠️ Simplified | 2D affine transformation (simplified) |
 | N/A | TransformedVertexSource.java | ✅ Complete | Applies transformation to vertex source |
+| agg_path_storage.h | PathStorage.java | ⚠️ Simplified | Path storage and manipulation |
+| agg_curves.h | Curve3.java | ✅ Complete | Quadratic Bezier curve |
+| agg_curves.h | Curve4.java | ✅ Complete | Cubic Bezier curve |
 
 ### Examples (1 file)
 
@@ -130,7 +133,7 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~9% (25 of 286 files)**
+**Overall Progress: ~10% (28 of 286 files)**
 
 - Core basics: ✅ Complete
 - Geometry primitives: ✅ Complete (100%)
@@ -138,10 +141,11 @@ Java translation may have different performance characteristics:
 - Math functions: ✅ Complete
 - Color classes: ✅ Complete (Rgba, Rgba8)
 - Gamma functions: ✅ Complete (functions + LUT)
-- Transformations: ✅ Basic support (Transform2D, TransformedVertexSource)
+- Transformations: ✅ Complete (Transform2D, TransformedVertexSource)
 - Vertex source interface: ✅ Complete
 - Bounding utilities: ✅ Complete
-- Path processing: ❌ Not started
+- Path storage: ✅ Basic support (PathStorage)
+- Curve classes: ✅ Complete (Curve3, Curve4)
 - Rendering pipeline: ❌ Not started
 - Advanced features: ❌ Not started
 
