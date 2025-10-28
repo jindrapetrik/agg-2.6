@@ -39,7 +39,13 @@ This is an ongoing translation from C++ to Java 8. The following classes have be
 - [x] `AggBasics` - Basic types, constants, and path command utilities
 - [x] `Arc` - Arc vertex generator
 - [x] `BSpline` - Bi-cubic spline interpolation
+- [x] `Arrowhead` - Arrowhead/arrowtail generator
+- [x] `Rgba` - RGBA color representation
+- [x] `Ellipse` - Ellipse vertex generator
+- [x] `RoundedRect` - Rounded rectangle generator
 - [ ] Additional classes in progress...
+
+**Progress: ~3% complete (8 classes from ~286 C++ files)**
 
 ### Original C++ Source
 

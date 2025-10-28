@@ -20,7 +20,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (6 files)
+### Core Classes (10 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
@@ -29,6 +29,8 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | agg_bspline.h, agg_bspline.cpp | BSpline.java | ✅ Complete | Bi-cubic spline interpolation |
 | agg_arrowhead.h, agg_arrowhead.cpp | Arrowhead.java | ✅ Complete | Arrowhead/arrowtail generator |
 | agg_color_rgba.h | Rgba.java | ⚠️ Simplified | Basic RGBA color (simplified) |
+| agg_ellipse.h | Ellipse.java | ✅ Complete | Ellipse vertex generator |
+| agg_rounded_rect.h, agg_rounded_rect.cpp | RoundedRect.java | ✅ Complete | Rounded rectangle generator |
 
 ### Examples (1 file)
 
@@ -49,8 +51,8 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 - [ ] agg_bezier_arc.h/cpp - Bezier arc approximation
 - [ ] agg_curves.h/cpp - Curve classes
-- [ ] agg_ellipse.h/cpp - Ellipse generator
-- [ ] agg_rounded_rect.h/cpp - Rounded rectangle
+- [x] agg_ellipse.h - Ellipse generator
+- [x] agg_rounded_rect.h/cpp - Rounded rectangle
 
 ### Medium Priority - Path Processing
 
@@ -110,10 +112,10 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~2% (6 of 286 files)**
+**Overall Progress: ~3.5% (10 of 286 files)**
 
 - Core basics: ✅ Complete
-- Geometry primitives: 🔄 In Progress (20% complete)
+- Geometry primitives: 🔄 In Progress (40% complete)
 - Path processing: ❌ Not started
 - Rendering pipeline: ❌ Not started
 - Advanced features: ❌ Not started

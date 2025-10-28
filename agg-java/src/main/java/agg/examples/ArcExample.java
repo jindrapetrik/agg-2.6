@@ -60,5 +60,52 @@ public class ArcExample {
         }
         
         System.out.println("\nBSpline interpolation would generate smooth curve through these points.");
+        
+        // Demonstrate Ellipse
+        System.out.println("\n\nAGG Java - Ellipse Example");
+        System.out.println("===========================\n");
+        demonstrateEllipse();
+        
+        // Demonstrate RoundedRect
+        System.out.println("\n\nAGG Java - RoundedRect Example");
+        System.out.println("================================\n");
+        demonstrateRoundedRect();
+    }
+    
+    private static void demonstrateEllipse() {
+        agg.Ellipse ellipse = new agg.Ellipse(50.0, 50.0, 30.0, 20.0);
+        System.out.println("Ellipse: center=(50, 50), rx=30, ry=20");
+        
+        ellipse.rewind(0);
+        double[] xy = new double[2];
+        int cmd;
+        int count = 0;
+        
+        // Just show first 5 vertices
+        while (count < 5 && !isStop(cmd = ellipse.vertex(xy))) {
+            String cmdName = isMoveTo(cmd) ? "MOVE_TO" : "LINE_TO";
+            System.out.printf("Vertex %2d: x=%6.2f, y=%6.2f [%s]%n", 
+                            count++, xy[0], xy[1], cmdName);
+        }
+        System.out.println("... (more vertices follow)");
+    }
+    
+    private static void demonstrateRoundedRect() {
+        agg.RoundedRect rect = new agg.RoundedRect(10, 10, 90, 60, 5);
+        System.out.println("RoundedRect: (10, 10) to (90, 60), radius=5");
+        
+        rect.rewind(0);
+        double[] xy = new double[2];
+        int cmd;
+        int count = 0;
+        
+        // Show first 10 vertices
+        while (count < 10 && !isStop(cmd = rect.vertex(xy))) {
+            String cmdName = isMoveTo(cmd) ? "MOVE_TO" : 
+                            isLineTo(cmd) ? "LINE_TO" : "OTHER";
+            System.out.printf("Vertex %2d: x=%6.2f, y=%6.2f [%s]%n", 
+                            count++, xy[0], xy[1], cmdName);
+        }
+        System.out.println("... (more vertices follow)");
     }
 }
