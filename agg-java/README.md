@@ -53,9 +53,11 @@ This is an ongoing translation from C++ to Java 8. The following classes have be
 - [x] `VertexSource` - Interface for vertex sources
 - [x] `BoundingRect` - Bounding rectangle utilities
 - [x] `Point2D` - 2D point utility class
+- [x] `Rgba8` - 8-bit RGBA color (0-255 components)
+- [x] `Transform2D` - 2D affine transformation matrix
 - [ ] Additional classes in progress...
 
-**Progress: ~7.5% complete (18 classes from ~286 C++ files)**
+**Progress: ~8.5% complete (20 classes from ~286 C++ files)**
 
 ### Original C++ Source
 
