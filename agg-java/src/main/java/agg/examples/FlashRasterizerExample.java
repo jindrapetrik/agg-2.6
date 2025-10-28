@@ -111,8 +111,9 @@ public class FlashRasterizerExample {
     
     /**
      * Render a shape with proper left/right fill handling.
-     * For compound shapes with edge-based fills, this attempts to group
-     * paths by fill index and render them together.
+     * For compound shapes with edge-based fills, this groups
+     * paths by fill index and renders them together, with path
+     * reversal for right fills.
      * Returns the number of fills rendered.
      */
     private static int renderShapeWithFills(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
@@ -122,6 +123,7 @@ public class FlashRasterizerExample {
         
         Transform2D scale = new Transform2D();
         ConvTransform trans = new ConvTransform(shape, scale);
+        PathReverse reverseTrans = new PathReverse(trans);
         
         // Group paths by their fill indices
         // For proper compound rendering, we need to add ALL paths that border a fill region
@@ -165,11 +167,15 @@ public class FlashRasterizerExample {
                 }
             }
             
-            // TODO: Add paths where this fill is on the RIGHT
-            // For proper compound rasterization, we'd need to reverse the path direction
-            // when the fill is on the right side. Without path reversal, adding right-fill
-            // paths creates spurious filled rectangles. For now, we only use leftFill paths.
-            // java.util.List<Integer> rightPaths = rightFillPaths.get(fillIdx);
+            // Add paths where this fill is on the RIGHT (with reversed direction)
+            // When fill is on the right, we need to traverse the path in reverse
+            java.util.List<Integer> rightPaths = rightFillPaths.get(fillIdx);
+            if (rightPaths != null) {
+                for (Integer pathIdx : rightPaths) {
+                    PathStyle style = shape.style(pathIdx);
+                    ras.addPath(reverseTrans, style.pathId);
+                }
+            }
             
             // Render this fill region
             RenderingScanlines.renderScanlines(ras, sl, renBase, color);
