@@ -188,4 +188,11 @@ public final class AggBasics {
     public static int setCW(int c) {
         return c | PATH_FLAGS_CW;
     }
+    
+    /**
+     * Get the close flag from path command/flags.
+     */
+    public static int getCloseFlag(int c) {
+        return c & PATH_FLAGS_CLOSE;
+    }
 }
