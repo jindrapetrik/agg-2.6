@@ -25,7 +25,7 @@ import static agg.AggBasics.*;
  * Ellipse generator.
  * Java translation of agg_ellipse.h
  */
-public class Ellipse {
+public class Ellipse implements VertexSource {
     
     private double x;
     private double y;

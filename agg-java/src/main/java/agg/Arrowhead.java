@@ -25,7 +25,7 @@ import static agg.AggBasics.*;
  * Simple arrowhead/arrowtail generator.
  * Java translation of agg_arrowhead.h and agg_arrowhead.cpp
  */
-public class Arrowhead {
+public class Arrowhead implements VertexSource {
     
     private double headD1;
     private double headD2;

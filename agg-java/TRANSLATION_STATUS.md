@@ -20,23 +20,26 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (18 files)
+### Core Classes (21 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
 | agg_basics.h | AggBasics.java | ✅ Complete | Path commands, constants, utilities |
-| agg_arc.h, agg_arc.cpp | Arc.java | ✅ Complete | Arc vertex generator |
+| agg_arc.h, agg_arc.cpp | Arc.java | ✅ Complete | Arc vertex generator (implements VertexSource) |
 | agg_bspline.h, agg_bspline.cpp | BSpline.java | ✅ Complete | Bi-cubic spline interpolation |
-| agg_arrowhead.h, agg_arrowhead.cpp | Arrowhead.java | ✅ Complete | Arrowhead/arrowtail generator |
+| agg_arrowhead.h, agg_arrowhead.cpp | Arrowhead.java | ✅ Complete | Arrowhead/arrowtail generator (implements VertexSource) |
 | agg_color_rgba.h | Rgba.java | ⚠️ Simplified | Basic RGBA color (simplified) |
-| agg_ellipse.h | Ellipse.java | ✅ Complete | Ellipse vertex generator |
-| agg_rounded_rect.h, agg_rounded_rect.cpp | RoundedRect.java | ✅ Complete | Rounded rectangle generator |
-| agg_bezier_arc.h, agg_bezier_arc.cpp | BezierArc.java | ✅ Complete | Bezier arc approximation |
+| agg_ellipse.h | Ellipse.java | ✅ Complete | Ellipse vertex generator (implements VertexSource) |
+| agg_rounded_rect.h, agg_rounded_rect.cpp | RoundedRect.java | ✅ Complete | Rounded rectangle generator (implements VertexSource) |
+| agg_bezier_arc.h, agg_bezier_arc.cpp | BezierArc.java | ✅ Complete | Bezier arc approximation (implements VertexSource) |
 | rect_base template | RectD.java | ✅ Complete | Rectangle with double precision |
 | agg_clip_liang_barsky.h | ClipLiangBarsky.java | ✅ Complete | Line clipping algorithm |
 | agg_math.h | AggMath.java | ✅ Complete | Math utility functions |
 | vertex_dist struct | VertexDist.java | ✅ Complete | Vertex with distance |
 | agg_gamma_functions.h | GammaFunction.java, GammaFunctions.java | ✅ Complete | Gamma correction |
+| vertex_source concept | VertexSource.java | ✅ Complete | Vertex source interface |
+| agg_bounding_rect.h | BoundingRect.java | ✅ Complete | Bounding rectangle utilities |
+| N/A | Point2D.java | ✅ Complete | 2D point utility class |
 
 ### Examples (1 file)
 
@@ -123,13 +126,15 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~6.5% (18 of 286 files)**
+**Overall Progress: ~7.5% (21 of 286 files)**
 
 - Core basics: ✅ Complete
 - Geometry primitives: ✅ Complete (100%)
-- Utility classes: 🔄 In Progress (50% complete)
+- Utility classes: ✅ Complete (100%)
 - Math functions: ✅ Complete
 - Gamma functions: ✅ Complete
+- Vertex source interface: ✅ Complete
+- Bounding utilities: ✅ Complete
 - Path processing: ❌ Not started
 - Rendering pipeline: ❌ Not started
 - Advanced features: ❌ Not started

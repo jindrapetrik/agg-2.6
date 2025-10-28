@@ -50,9 +50,12 @@ This is an ongoing translation from C++ to Java 8. The following classes have be
 - [x] `VertexDist` - Vertex with distance calculation
 - [x] `GammaFunction` - Gamma correction interface
 - [x] `GammaFunctions` - Gamma correction implementations
+- [x] `VertexSource` - Interface for vertex sources
+- [x] `BoundingRect` - Bounding rectangle utilities
+- [x] `Point2D` - 2D point utility class
 - [ ] Additional classes in progress...
 
-**Progress: ~6.5% complete (15 classes from ~286 C++ files)**
+**Progress: ~7.5% complete (18 classes from ~286 C++ files)**
 
 ### Original C++ Source
 

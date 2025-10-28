@@ -27,7 +27,7 @@ import static agg.AggBasics.*;
  * Produces at most 4 consecutive cubic bezier curves, i.e., 4, 7, 10, or 13 vertices.
  * Java translation of agg_bezier_arc.h and agg_bezier_arc.cpp
  */
-public class BezierArc {
+public class BezierArc implements VertexSource {
     
     // This epsilon is used to prevent us from adding degenerate curves
     private static final double BEZIER_ARC_ANGLE_EPSILON = 0.01;

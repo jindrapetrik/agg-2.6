@@ -25,7 +25,7 @@ import static agg.AggBasics.*;
  * Rounded rectangle vertex generator.
  * Java translation of agg_rounded_rect.h and agg_rounded_rect.cpp
  */
-public class RoundedRect {
+public class RoundedRect implements VertexSource {
     
     private double x1;
     private double y1;

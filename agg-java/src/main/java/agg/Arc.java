@@ -25,7 +25,7 @@ import static agg.AggBasics.*;
  * Arc vertex generator.
  * Java translation of agg_arc.h and agg_arc.cpp
  */
-public class Arc {
+public class Arc implements VertexSource {
     
     private double x;
     private double y;
