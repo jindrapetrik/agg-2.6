@@ -48,6 +48,11 @@ public final class AggBasics {
     public static final int PATH_FLAGS_CLOSE = 0x40;
     public static final int PATH_FLAGS_MASK = 0xF0;
     
+    // Polygon subpixel constants
+    public static final int POLY_SUBPIXEL_SHIFT = 8;
+    public static final int POLY_SUBPIXEL_SCALE = 1 << POLY_SUBPIXEL_SHIFT;  // 256
+    public static final int POLY_SUBPIXEL_MASK = POLY_SUBPIXEL_SCALE - 1;  // 255
+    
     /**
      * Check if a path command is a vertex command.
      */
@@ -194,5 +199,19 @@ public final class AggBasics {
      */
     public static int getCloseFlag(int c) {
         return c & PATH_FLAGS_CLOSE;
+    }
+    
+    /**
+     * Integer rounding utility.
+     */
+    public static int iround(double v) {
+        return (int)((v < 0.0) ? v - 0.5 : v + 0.5);
+    }
+    
+    /**
+     * Unsigned integer rounding utility.
+     */
+    public static int uround(double v) {
+        return (int)(v + 0.5);
     }
 }
