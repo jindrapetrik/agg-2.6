@@ -110,10 +110,16 @@ public class FlashRasterizerExample {
     }
     
     /**
-     * Render a shape with proper left/right fill handling.
-     * For compound shapes with edge-based fills, this groups
-     * paths by fill index and renders them together, with path
-     * reversal for right fills.
+     * Render a shape using the flash_rasterizer2 approach.
+     * 
+     * This method decomposes compound shapes into separate paths per fill style,
+     * using the regular rasterizer with auto_close(false). For each fill style:
+     * 1. Add all paths with leftFill matching the style (normal direction)
+     * 2. Add all paths with rightFill matching the style (inverted direction)
+     * 
+     * This avoids the complexity of a full compound rasterizer while correctly
+     * handling Flash edge-based fill definitions.
+     * 
      * Returns the number of fills rendered.
      */
     private static int renderShapeWithFills(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
@@ -123,63 +129,54 @@ public class FlashRasterizerExample {
         
         Transform2D scale = new Transform2D();
         ConvTransform trans = new ConvTransform(shape, scale);
-        PathReverse reverseTrans = new PathReverse(trans);
         
-        // Group paths by their fill indices
-        // For proper compound rendering, we need to add ALL paths that border a fill region
-        java.util.Map<Integer, java.util.List<Integer>> leftFillPaths = new java.util.HashMap<>();
-        java.util.Map<Integer, java.util.List<Integer>> rightFillPaths = new java.util.HashMap<>();
-        
-        for (int i = 0; i < shape.paths(); i++) {
-            PathStyle style = shape.style(i);
-            
-            if (style.leftFill >= 0) {
-                leftFillPaths.computeIfAbsent(style.leftFill, k -> new java.util.ArrayList<>()).add(i);
-            }
-            if (style.rightFill >= 0) {
-                rightFillPaths.computeIfAbsent(style.rightFill, k -> new java.util.ArrayList<>()).add(i);
-            }
-        }
-        
-        // Find all unique fill indices
-        java.util.Set<Integer> allFills = new java.util.HashSet<>();
-        allFills.addAll(leftFillPaths.keySet());
-        allFills.addAll(rightFillPaths.keySet());
+        // Temporary path for inverting
+        PathStorage tmpPath = new PathStorage();
         
         int fillsRendered = 0;
         
-        // Render each fill region by adding all its bordering paths
-        for (Integer fillIdx : allFills) {
-            if (fillIdx < 0) continue;
-            
-            // Ensure fillIdx is within color array bounds
-            int colorIdx = fillIdx >= colors.length ? fillIdx % colors.length : fillIdx;
-            Rgba8 color = colors[colorIdx];
-            
+        // Use regular rasterizer in a mode that doesn't automatically close contours
+        // This allows us to work with edge paths instead of closed polygons
+        ras.autoClose(false);
+        
+        // Render each fill style from min to max
+        for (int s = shape.minStyle(); s <= shape.maxStyle(); s++) {
             ras.reset();
             
-            // Add all paths where this fill is on the LEFT (paths go counter-clockwise around fill)
-            java.util.List<Integer> leftPaths = leftFillPaths.get(fillIdx);
-            if (leftPaths != null) {
-                for (Integer pathIdx : leftPaths) {
-                    PathStyle style = shape.style(pathIdx);
-                    ras.addPath(trans, style.pathId);
+            // For each path, check if it contributes to this fill style
+            for (int i = 0; i < shape.paths(); i++) {
+                PathStyle style = shape.style(i);
+                
+                // Only process paths where left and right fills are different
+                // (paths with same left/right fill would add degenerate geometry)
+                if (style.leftFill != style.rightFill) {
+                    
+                    // If this path has the fill on the LEFT side, add it normally
+                    if (style.leftFill == s) {
+                        ras.addPath(trans, style.pathId);
+                    }
+                    
+                    // If this path has the fill on the RIGHT side, add it inverted
+                    if (style.rightFill == s) {
+                        tmpPath.removeAll();
+                        tmpPath.concatPath(trans, style.pathId);
+                        tmpPath.invertPolygon(0);
+                        ras.addPath(tmpPath, 0);
+                    }
                 }
             }
             
-            // NOTE: For a complete compound rasterizer matching C++ AGG behavior,
-            // we would need to implement RasterizerCompoundAa which stores left/right
-            // fill indices with each cell and uses a style handler during rendering.
-            // That's ~1000+ lines of code.
-            //
-            // For now, we only use leftFill paths to avoid spurious rectangles.
-            // This works well for properly formed Flash shapes where all fill regions
-            // have leftFill paths defining their boundaries.
+            // Ensure fillIdx is within color array bounds
+            int colorIdx = s >= colors.length ? s % colors.length : s;
+            Rgba8 color = colors[colorIdx];
             
             // Render this fill region
             RenderingScanlines.renderScanlines(ras, sl, renBase, color);
             fillsRendered++;
         }
+        
+        // Restore auto_close
+        ras.autoClose(true);
         
         return fillsRendered;
     }

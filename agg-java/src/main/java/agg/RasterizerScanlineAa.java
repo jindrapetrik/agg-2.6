@@ -10,6 +10,7 @@ public class RasterizerScanlineAa {
     private boolean started;
     private int curScanY;
     private int curCellIndex;
+    private boolean autoClose;  // Whether to automatically close paths
     
     public RasterizerScanlineAa() {
         cells = new RasterizerCellsAa();
@@ -18,6 +19,18 @@ public class RasterizerScanlineAa {
         started = false;
         curScanY = 0x7FFFFFFF;
         curCellIndex = 0;
+        autoClose = true;  // Default to true for normal polygon behavior
+    }
+    
+    /**
+     * Set whether paths should be automatically closed.
+     * When false, the rasterizer works with polylines instead of polygons.
+     * This is useful for compound shapes where edge paths define fill regions.
+     * 
+     * @param flag true to auto-close paths, false otherwise
+     */
+    public void autoClose(boolean flag) {
+        autoClose = flag;
     }
     
     public void reset() {
@@ -28,7 +41,7 @@ public class RasterizerScanlineAa {
     }
     
     public void moveTo(int x, int y) {
-        if (started) {
+        if (started && autoClose) {
             cells.line(curX, curY, curX, curY);
         }
         curX = x;

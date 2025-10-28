@@ -117,6 +117,13 @@ public final class AggBasics {
     }
     
     /**
+     * Check if command starts a new polygon (move_to or end_poly).
+     */
+    public static boolean isNextPoly(int c) {
+        return isStop(c) || isMoveTo(c) || isEndPoly(c);
+    }
+    
+    /**
      * Check if path flags indicate close.
      */
     public static boolean isClose(int c) {

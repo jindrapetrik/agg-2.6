@@ -166,6 +166,40 @@ public class CompoundShape implements VertexSource {
         return affine.getScale();
     }
     
+    /**
+     * Get the minimum fill style index in this shape.
+     * @return minimum style index
+     */
+    public int minStyle() {
+        int min = Integer.MAX_VALUE;
+        for (PathStyle style : styles) {
+            if (style.leftFill >= 0 && style.leftFill < min) {
+                min = style.leftFill;
+            }
+            if (style.rightFill >= 0 && style.rightFill < min) {
+                min = style.rightFill;
+            }
+        }
+        return min == Integer.MAX_VALUE ? 0 : min;
+    }
+    
+    /**
+     * Get the maximum fill style index in this shape.
+     * @return maximum style index
+     */
+    public int maxStyle() {
+        int max = Integer.MIN_VALUE;
+        for (PathStyle style : styles) {
+            if (style.leftFill >= 0 && style.leftFill > max) {
+                max = style.leftFill;
+            }
+            if (style.rightFill >= 0 && style.rightFill > max) {
+                max = style.rightFill;
+            }
+        }
+        return max == Integer.MIN_VALUE ? 0 : max;
+    }
+    
     @Override
     public void rewind(int pathId) {
         trans.rewind(pathId);
