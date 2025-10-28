@@ -171,8 +171,8 @@ public class RoundedRect {
      * Normalize corner radii to fit within rectangle.
      */
     public void normalizeRadius() {
-        double dx = Math.abs(y2 - y1);
-        double dy = Math.abs(x2 - x1);
+        double dx = Math.abs(x2 - x1);
+        double dy = Math.abs(y2 - y1);
         
         double k = 1.0;
         double t;
