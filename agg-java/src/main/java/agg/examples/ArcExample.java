@@ -70,6 +70,11 @@ public class ArcExample {
         System.out.println("\n\nAGG Java - RoundedRect Example");
         System.out.println("================================\n");
         demonstrateRoundedRect();
+        
+        // Demonstrate BezierArc
+        System.out.println("\n\nAGG Java - BezierArc Example");
+        System.out.println("==============================\n");
+        demonstrateBezierArc();
     }
     
     private static void demonstrateEllipse() {
@@ -107,5 +112,26 @@ public class ArcExample {
                             count++, xy[0], xy[1], cmdName);
         }
         System.out.println("... (more vertices follow)");
+    }
+    
+    private static void demonstrateBezierArc() {
+        agg.BezierArc bezArc = new agg.BezierArc(50, 50, 30, 20, 0, Math.PI);
+        System.out.println("BezierArc: center=(50, 50), rx=30, ry=20");
+        System.out.println("           start=0, sweep=PI (half circle)");
+        
+        bezArc.rewind(0);
+        double[] xy = new double[2];
+        int cmd;
+        int count = 0;
+        
+        // Show all vertices
+        while (!isStop(cmd = bezArc.vertex(xy))) {
+            String cmdName = isMoveTo(cmd) ? "MOVE_TO" : 
+                            isCurve4(cmd) ? "CURVE4" : 
+                            isLineTo(cmd) ? "LINE_TO" : "OTHER";
+            System.out.printf("Vertex %2d: x=%6.2f, y=%6.2f [%s]%n", 
+                            count++, xy[0], xy[1], cmdName);
+        }
+        System.out.printf("Total vertices: %d (produces bezier curves)%n", count);
     }
 }
