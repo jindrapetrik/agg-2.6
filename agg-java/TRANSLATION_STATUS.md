@@ -20,7 +20,7 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 
 ## Completed Translations
 
-### Core Classes (23 files)
+### Core Classes (25 files)
 
 | C++ File(s) | Java File | Status | Notes |
 |------------|-----------|--------|-------|
@@ -38,10 +38,12 @@ This document tracks the translation progress of the Anti-Grain Geometry (AGG) l
 | agg_math.h | AggMath.java | ✅ Complete | Math utility functions |
 | vertex_dist struct | VertexDist.java | ✅ Complete | Vertex with distance |
 | agg_gamma_functions.h | GammaFunction.java, GammaFunctions.java | ✅ Complete | Gamma correction |
+| agg_gamma_lut.h | GammaLut.java | ✅ Complete | Gamma lookup table |
 | vertex_source concept | VertexSource.java | ✅ Complete | Vertex source interface |
 | agg_bounding_rect.h | BoundingRect.java | ✅ Complete | Bounding rectangle utilities |
 | N/A | Point2D.java | ✅ Complete | 2D point utility class |
 | agg_trans_affine.h | Transform2D.java | ⚠️ Simplified | 2D affine transformation (simplified) |
+| N/A | TransformedVertexSource.java | ✅ Complete | Applies transformation to vertex source |
 
 ### Examples (1 file)
 
@@ -128,15 +130,15 @@ Java translation may have different performance characteristics:
 
 ## Translation Progress
 
-**Overall Progress: ~8.5% (23 of 286 files)**
+**Overall Progress: ~9% (25 of 286 files)**
 
 - Core basics: ✅ Complete
 - Geometry primitives: ✅ Complete (100%)
 - Utility classes: ✅ Complete (100%)
 - Math functions: ✅ Complete
 - Color classes: ✅ Complete (Rgba, Rgba8)
-- Gamma functions: ✅ Complete
-- Transformations: ✅ Basic support (Transform2D)
+- Gamma functions: ✅ Complete (functions + LUT)
+- Transformations: ✅ Basic support (Transform2D, TransformedVertexSource)
 - Vertex source interface: ✅ Complete
 - Bounding utilities: ✅ Complete
 - Path processing: ❌ Not started
