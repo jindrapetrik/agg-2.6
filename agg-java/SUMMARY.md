@@ -12,9 +12,9 @@ This project represents the initial phase of translating the Anti-Grain Geometry
 - **Total C++ files**: 286
 
 ### Current Java Translation
-- **Java source files**: 20
-- **Translation progress**: ~8.5% (23 C++ files → 20 Java files)
-- **JAR artifact**: agg-java-2.6.0.jar (34KB)
+- **Java source files**: 22
+- **Translation progress**: ~9% (25 C++ files → 22 Java files)
+- **JAR artifact**: agg-java-2.6.0.jar (36KB)
 
 ## Completed Translations
 
@@ -133,6 +133,16 @@ This project represents the initial phase of translating the Anti-Grain Geometry
 - Examples for Arc, Ellipse, RoundedRect, BezierArc
 - Vertex generation demonstration
 
+### 21. GammaLut.java
+**Source**: `agg_gamma_lut.h`
+- Fast gamma correction using lookup tables
+- O(1) direct and inverse gamma operations
+
+### 22. TransformedVertexSource.java
+**Purpose**: Utility class
+- Applies transformation to any vertex source
+- Enables easy path transformation without modification
+
 ## Key Translation Decisions
 
 ### 1. Naming Conventions
@@ -212,20 +222,20 @@ mvn clean            # Clean build artifacts
 
 ## Translation Progress Summary
 
-**Current Status: ~8.5% Complete**
-- **Completed**: 20 Java classes from ~286 C++ files
-- **JAR Size**: 34KB (more than doubled from initial 15KB)
+**Current Status: ~9% Complete**
+- **Completed**: 22 Java classes from ~286 C++ files
+- **JAR Size**: 36KB (more than doubled from initial 15KB)
 - **Categories Complete**:
   - ✅ Basic geometry primitives
   - ✅ Math utilities
   - ✅ Color support (double and 8-bit precision)
-  - ✅ Gamma correction
+  - ✅ Gamma correction (functions + lookup tables)
   - ✅ Basic transformations
   - ✅ Vertex source interface
 - **In Progress**: Path processing, rendering pipeline
 - **Not Started**: Advanced rendering, image processing
 
-The translation provides a solid foundation with all essential geometric primitives, color handling, and transformation support.
+The translation provides a comprehensive foundation with all essential geometric primitives, color handling, transformation support, and performance optimizations.
 
 ## File Structure
 
