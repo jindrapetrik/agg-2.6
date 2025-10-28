@@ -165,17 +165,11 @@ public class FlashRasterizerExample {
                 }
             }
             
-            // Add all paths where this fill is on the RIGHT (paths go clockwise around fill)
-            // Note: For proper compound rasterization, we'd need to reverse these paths
-            // For now, just add them as-is (this is a simplification)
-            java.util.List<Integer> rightPaths = rightFillPaths.get(fillIdx);
-            if (rightPaths != null) {
-                for (Integer pathIdx : rightPaths) {
-                    PathStyle style = shape.style(pathIdx);
-                    // In a full implementation, we'd reverse the path direction here
-                    ras.addPath(trans, style.pathId);
-                }
-            }
+            // TODO: Add paths where this fill is on the RIGHT
+            // For proper compound rasterization, we'd need to reverse the path direction
+            // when the fill is on the right side. Without path reversal, adding right-fill
+            // paths creates spurious filled rectangles. For now, we only use leftFill paths.
+            // java.util.List<Integer> rightPaths = rightFillPaths.get(fillIdx);
             
             // Render this fill region
             RenderingScanlines.renderScanlines(ras, sl, renBase, color);
