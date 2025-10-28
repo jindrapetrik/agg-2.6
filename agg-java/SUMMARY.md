@@ -12,9 +12,9 @@ This project represents the initial phase of translating the Anti-Grain Geometry
 - **Total C++ files**: 286
 
 ### Current Java Translation
-- **Java source files**: 22
-- **Translation progress**: ~9% (25 C++ files → 22 Java files)
-- **JAR artifact**: agg-java-2.6.0.jar (36KB)
+- **Java source files**: 25
+- **Translation progress**: ~10% (28 C++ files → 25 Java files)
+- **JAR artifact**: agg-java-2.6.0.jar (42KB)
 
 ## Completed Translations
 
@@ -143,6 +143,30 @@ This project represents the initial phase of translating the Anti-Grain Geometry
 - Applies transformation to any vertex source
 - Enables easy path transformation without modification
 
+### 23. PathStorage.java
+**Source**: `agg_path_storage.h` (simplified)
+- Path storage and manipulation container
+- moveTo, lineTo, curve3, curve4, arc operations
+- Transform all vertices in path
+- Add paths from other vertex sources
+
+### 24. Curve3.java
+**Source**: `agg_curves.h` (curve3)
+- Quadratic Bezier curve (3 control points)
+- Adaptive subdivision algorithm
+- Converts curve to line segments
+
+### 25. Curve4.java
+**Source**: `agg_curves.h` (curve4)
+- Cubic Bezier curve (4 control points)
+- Adaptive subdivision algorithm
+- High-quality curve approximation
+
+### 26. ArcExample.java
+**Purpose**: Demonstration and testing
+- Examples for Arc, Ellipse, RoundedRect, BezierArc
+- Vertex generation demonstration
+
 ## Key Translation Decisions
 
 ### 1. Naming Conventions
@@ -222,20 +246,22 @@ mvn clean            # Clean build artifacts
 
 ## Translation Progress Summary
 
-**Current Status: ~9% Complete**
-- **Completed**: 22 Java classes from ~286 C++ files
-- **JAR Size**: 36KB (more than doubled from initial 15KB)
+**Current Status: ~10% Complete**
+- **Completed**: 25 Java classes from ~286 C++ files
+- **JAR Size**: 42KB (nearly tripled from initial 15KB)
 - **Categories Complete**:
   - ✅ Basic geometry primitives
   - ✅ Math utilities
   - ✅ Color support (double and 8-bit precision)
   - ✅ Gamma correction (functions + lookup tables)
-  - ✅ Basic transformations
+  - ✅ Transformations (affine 2D + wrappers)
   - ✅ Vertex source interface
-- **In Progress**: Path processing, rendering pipeline
+  - ✅ Path storage and manipulation
+  - ✅ Bezier curve rendering (quadratic + cubic)
+- **In Progress**: Rendering pipeline
 - **Not Started**: Advanced rendering, image processing
 
-The translation provides a comprehensive foundation with all essential geometric primitives, color handling, transformation support, and performance optimizations.
+The translation now provides comprehensive support for path creation, storage, manipulation, and Bezier curve rendering - essential for vector graphics applications.
 
 ## File Structure
 
