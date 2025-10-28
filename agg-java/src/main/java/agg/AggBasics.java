@@ -215,13 +215,31 @@ public final class AggBasics {
         return (int)(v + 0.5);
     }
     
+    // Anti-aliasing constants
+    public static final int AA_SHIFT = 8;
+    public static final int AA_SCALE = 1 << AA_SHIFT;  // 256
+    public static final int AA_MASK = AA_SCALE - 1;     // 255
+    public static final int AA_SCALE2 = AA_SCALE * 2;   // 512
+    public static final int AA_MASK2 = AA_SCALE2 - 1;   // 511
+    
     /**
      * Calculate alpha value from coverage area.
      * Converts coverage area to alpha value (0-255).
+     * Based on the C++ AGG calculate_alpha function.
      */
     public static int calculateAlpha(int area) {
-        int alpha = (Math.abs(area) + (POLY_SUBPIXEL_SCALE / 2)) >> (POLY_SUBPIXEL_SHIFT * 2);
-        if (alpha > 255) alpha = 255;
-        return alpha;
+        int cover = area >> (POLY_SUBPIXEL_SHIFT * 2 + 1 - AA_SHIFT);
+        
+        if (cover < 0) cover = -cover;
+        
+        // For now, using fill_non_zero rule (not even_odd)
+        // If even_odd was needed:
+        // cover &= AA_MASK2;
+        // if (cover > AA_SCALE) cover = AA_SCALE2 - cover;
+        
+        if (cover > AA_MASK) cover = AA_MASK;
+        
+        // Without gamma correction, just return the cover value
+        return cover;
     }
 }

@@ -121,14 +121,14 @@ public class RasterizerScanlineAa {
                 // Add span for gap if needed
                 if (cell.x > prevX + 1 && coverAccum != 0) {
                     sl.addSpan(prevX + 1, cell.x - prevX - 1, 
-                              AggBasics.calculateAlpha(coverAccum * AggBasics.POLY_SUBPIXEL_SCALE * 2));
+                              AggBasics.calculateAlpha(coverAccum << (AggBasics.POLY_SUBPIXEL_SHIFT + 1)));
                 }
                 
                 // Add cell
                 int area = cell.area;
                 int cover = cell.cover;
                 
-                int alpha = AggBasics.calculateAlpha((coverAccum * AggBasics.POLY_SUBPIXEL_SCALE * 2 + area));
+                int alpha = AggBasics.calculateAlpha((coverAccum << (AggBasics.POLY_SUBPIXEL_SHIFT + 1)) - area);
                 if (alpha > 0) {
                     sl.addCell(cell.x, alpha);
                 }
@@ -140,7 +140,7 @@ public class RasterizerScanlineAa {
             // Add final span if needed
             if (coverAccum != 0 && prevX + 1 <= maxX()) {
                 sl.addSpan(prevX + 1, maxX() - prevX, 
-                          AggBasics.calculateAlpha(coverAccum * AggBasics.POLY_SUBPIXEL_SCALE * 2));
+                          AggBasics.calculateAlpha(coverAccum << (AggBasics.POLY_SUBPIXEL_SHIFT + 1)));
             }
         }
         
