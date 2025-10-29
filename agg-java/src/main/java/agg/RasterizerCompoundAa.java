@@ -309,6 +309,8 @@ public class RasterizerCompoundAa {
             startCell += st.numCells;
         }
         
+        // Store scanline start before incrementing
+        slStart = scanY;
         scanY++;
         return numStyles;
     }
@@ -366,13 +368,8 @@ public class RasterizerCompoundAa {
         
         sl.resetSpans();
         
-        if (styleIdx < 0) {
-            styleIdx = 0;
-        } else {
-            styleIdx++;
-        }
-        
-        if (styleIdx >= styles.size()) {
+        // styleIdx is the index into the styles array (0-based)
+        if (styleIdx < 0 || styleIdx >= styles.size()) {
             return false;
         }
         
