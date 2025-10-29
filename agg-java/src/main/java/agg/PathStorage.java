@@ -315,6 +315,31 @@ public class PathStorage implements VertexSource {
             end++;
         }
         
+        // Check if the polygon is explicitly closed (last vertex == first vertex)
+        // If so, remove the closing vertex before inversion
+        if (end > start + 2) {  // Need at least 3 vertices (start, middle, end)
+            int firstVertIdx = start * 2;
+            int lastVertIdx = (end - 1) * 2;
+            
+            if (lastVertIdx < vertices.size() - 1 && firstVertIdx < vertices.size() - 1) {
+                double firstX = vertices.get(firstVertIdx);
+                double firstY = vertices.get(firstVertIdx + 1);
+                double lastX = vertices.get(lastVertIdx);
+                double lastY = vertices.get(lastVertIdx + 1);
+                
+                // If first and last vertices are the same (within tolerance), remove the duplicate
+                if (Math.abs(firstX - lastX) < 1e-10 && Math.abs(firstY - lastY) < 1e-10) {
+                    // Remove the last command and vertices
+                    if (end - 1 < commands.size()) {
+                        commands.remove(end - 1);
+                        vertices.remove(lastVertIdx + 1);  // Remove Y
+                        vertices.remove(lastVertIdx);      // Remove X
+                        end--;  // Adjust end index
+                    }
+                }
+            }
+        }
+        
         invertPolygon(start, end);
     }
     
