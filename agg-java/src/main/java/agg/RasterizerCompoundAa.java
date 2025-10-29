@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static agg.AggBasics.*;
+import agg.AggBasics.FillingRule;
 
 /**
  * Compound rasterizer that tracks left AND right fills for each cell.
@@ -28,7 +29,7 @@ public class RasterizerCompoundAa {
     public static final int AA_SCALE2 = AA_SCALE * 2;
     public static final int AA_MASK2 = AA_SCALE2 - 1;
     
-    private RasterizerCellsAa<CellStyleAa> outline;
+    private RasterizerCellsCompound outline;
     private FillingRule fillingRule;
     private LayerOrder layerOrder;
     
@@ -48,7 +49,7 @@ public class RasterizerCompoundAa {
     private int slLen;
     
     public RasterizerCompoundAa() {
-        outline = new RasterizerCellsAa<>();
+        outline = new RasterizerCellsCompound();
         fillingRule = FillingRule.FILL_NON_ZERO;
         layerOrder = LayerOrder.LAYER_DIRECT;
         styles = new ArrayList<>();
@@ -111,6 +112,14 @@ public class RasterizerCompoundAa {
         outline.lineTo(x, y);
     }
     
+    /**
+     * Convert double coordinate to integer coordinate with subpixel precision.
+     * Equivalent to C++ conv_type::upscale()
+     */
+    private static int coordInt(double v) {
+        return iround(v * POLY_SUBPIXEL_SCALE);
+    }
+    
     public void moveToD(double x, double y) {
         moveTo(coordInt(x), coordInt(y));
     }
@@ -140,15 +149,14 @@ public class RasterizerCompoundAa {
     }
     
     public <VS extends VertexSource> void addPath(VS vs, int pathId) {
-        double[] x = new double[1];
-        double[] y = new double[1];
+        double[] xy = new double[2];
         
         vs.rewind(pathId);
         if (outline.sorted()) reset();
         
         int cmd;
-        while (!isStop(cmd = vs.vertex(x, y))) {
-            addVertex(x[0], y[0], cmd);
+        while (!isStop(cmd = vs.vertex(xy))) {
+            addVertex(xy[0], xy[1], cmd);
         }
     }
     
