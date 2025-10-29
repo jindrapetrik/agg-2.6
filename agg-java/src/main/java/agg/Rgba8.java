@@ -198,6 +198,63 @@ public class Rgba8 {
     }
     
     /**
+     * Add another color with coverage.
+     * Implements the C++ rgba8::add(c, cover) method.
+     * 
+     * @param c color to add
+     * @param cover coverage value (0-255)
+     * @return this color for chaining
+     */
+    public Rgba8 add(Rgba8 c, int cover) {
+        int cr, cg, cb, ca;
+        if (cover == BASE_MASK) {
+            if (c.a == BASE_MASK) {
+                // Full coverage and opaque source - just copy
+                set(c);
+                return this;
+            } else {
+                cr = r + c.r;
+                cg = g + c.g;
+                cb = b + c.b;
+                ca = a + c.a;
+            }
+        } else {
+            // Multiply color by coverage
+            cr = r + multCover(c.r, cover);
+            cg = g + multCover(c.g, cover);
+            cb = b + multCover(c.b, cover);
+            ca = a + multCover(c.a, cover);
+        }
+        r = Math.min(cr, BASE_MASK);
+        g = Math.min(cg, BASE_MASK);
+        b = Math.min(cb, BASE_MASK);
+        a = Math.min(ca, BASE_MASK);
+        return this;
+    }
+    
+    /**
+     * Multiply a component by coverage.
+     * Helper method for add(c, cover).
+     */
+    private static int multCover(int component, int cover) {
+        return (component * cover + BASE_MASK) >> BASE_SHIFT;
+    }
+    
+    /**
+     * Set this color to match another color.
+     * 
+     * @param c color to copy
+     * @return this color for chaining
+     */
+    public Rgba8 set(Rgba8 c) {
+        r = c.r;
+        g = c.g;
+        b = c.b;
+        a = c.a;
+        return this;
+    }
+    
+    /**
      * Convert to double precision RGBA.
      * 
      * @return double precision color

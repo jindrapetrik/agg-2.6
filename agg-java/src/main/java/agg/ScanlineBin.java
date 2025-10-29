@@ -7,7 +7,18 @@ package agg;
  * 
  * Translated from agg_scanline_bin.h
  */
-public class ScanlineBin {
+public class ScanlineBin implements Scanline {
+    
+    public static class Span {
+        public int x;
+        public int len;
+        
+        public Span(int x, int len) {
+            this.x = x;
+            this.len = len;
+        }
+    }
+    
     private int y;
     private int count;
     private int[] spans;  // x, len pairs
@@ -55,6 +66,16 @@ public class ScanlineBin {
         this.count = 0;
     }
     
+    @Override
+    public int y() {
+        return y;
+    }
+    
+    @Override
+    public int numSpans() {
+        return count;
+    }
+    
     public int getY() {
         return y;
     }
@@ -65,6 +86,14 @@ public class ScanlineBin {
     
     public int[] getSpans() {
         return spans;
+    }
+    
+    /**
+     * Get a span by index.
+     */
+    public Span getSpan(int index) {
+        int spanIdx = index * 2;
+        return new Span(spans[spanIdx], spans[spanIdx + 1]);
     }
     
     /**

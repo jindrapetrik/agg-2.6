@@ -110,86 +110,92 @@ public class FlashRasterizerExample {
     }
     
     /**
-     * Render a shape using the flash_rasterizer2 approach.
+     * Render a shape using RenderScanlinesCompound (matching C++ flash_rasterizer.cpp).
      * 
-     * This method decomposes compound shapes into separate paths per fill style,
-     * using the regular rasterizer with auto_close(false). For each fill style:
-     * 1. Add all paths with leftFill matching the style (normal direction)
-     * 2. Add all paths with rightFill matching the style (inverted direction)
-     * 
-     * This avoids the complexity of a full compound rasterizer while correctly
-     * handling Flash edge-based fill definitions.
+     * This method uses the compound rasterizer which correctly handles overlapping fills
+     * and provides perfect polygon stitching at boundaries. It matches the implementation
+     * in the C++ version's flash_rasterizer.cpp.
      * 
      * Returns the number of fills rendered.
      */
     private static int renderShapeWithFills(RendererBase renBase, CompoundShape shape, Rgba8[] colors) {
-        // Create rasterizer and scanline
-        RasterizerScanlineAa ras = new RasterizerScanlineAa();
+        // Create compound rasterizer, scanlines, and allocator
+        RasterizerCompoundAa rasc = new RasterizerCompoundAa();
         ScanlineU8 sl = new ScanlineU8();
+        ScanlineBin slBin = new ScanlineBin();
+        SpanAllocator alloc = new SpanAllocator();
         
         Transform2D scale = new Transform2D();
         ConvTransform trans = new ConvTransform(shape, scale);
         
-        // Temporary path for inverting
-        PathStorage tmpPath = new PathStorage();
+        // Create style handler for color mapping
+        TestStyles styleHandler = new TestStyles(colors);
         
-        int fillsRendered = 0;
+        // Setup rasterizer
+        rasc.clipBox(0, 0, WIDTH, HEIGHT);
+        rasc.reset();
         
-        // Use regular rasterizer in a mode that doesn't automatically close contours
-        // This allows us to work with edge paths instead of closed polygons
-        ras.autoClose(false);
+        System.out.println("  Adding paths to compound rasterizer:");
         
-        // Render each fill style from min to max
-        int minS = shape.minStyle();
-        int maxS = shape.maxStyle();
-        System.out.println("  Rendering fills from " + minS + " to " + maxS);
-        
-        for (int s = minS; s <= maxS; s++) {
-            ras.reset();
-            int pathsAdded = 0;
+        // Add all paths with their left/right fill styles
+        for (int i = 0; i < shape.paths(); i++) {
+            PathStyle style = shape.style(i);
             
-            // For each path, check if it contributes to this fill style
-            for (int i = 0; i < shape.paths(); i++) {
-                PathStyle style = shape.style(i);
+            if (style.leftFill >= 0 || style.rightFill >= 0) {
+                // Set the left and right fill styles for this path
+                rasc.styles(style.leftFill, style.rightFill);
                 
-                // Only process paths where left and right fills are different
-                // (paths with same left/right fill would add degenerate geometry)
-                if (style.leftFill != style.rightFill) {
-                    
-                    // If this path has the fill on the LEFT side, add it normally
-                    if (style.leftFill == s) {
-                        ras.addPath(trans, style.pathId);
-                        pathsAdded++;
-                        System.out.println("    Fill " + s + ": Added path " + i + " (leftFill)");
-                    }
-                    
-                    // If this path has the fill on the RIGHT side, add it inverted
-                    if (style.rightFill == s) {
-                        tmpPath.removeAll();
-                        tmpPath.concatPath(trans, style.pathId);
-                        tmpPath.invertPolygon(0);
-                        ras.addPath(tmpPath, 0);
-                        pathsAdded++;
-                        System.out.println("    Fill " + s + ": Added path " + i + " (rightFill, inverted)");
-                    }
-                }
+                // Add the path to the compound rasterizer
+                rasc.addPath(trans, style.pathId);
+                
+                System.out.printf("    Path %d: left_fill=%d, right_fill=%d%n",
+                    i, style.leftFill, style.rightFill);
             }
-            
-            System.out.println("    Fill " + s + ": Total paths added = " + pathsAdded);
-            
-            // Ensure fillIdx is within color array bounds
-            int colorIdx = s >= colors.length ? s % colors.length : s;
-            Rgba8 color = colors[colorIdx];
-            
-            // Render this fill region
-            RenderingScanlines.renderScanlines(ras, sl, renBase, color);
-            fillsRendered++;
         }
         
-        // Restore auto_close
-        ras.autoClose(true);
+        // Render using compound scanline renderer
+        System.out.println("  Rendering with compound rasterizer...");
+        RenderScanlinesCompound.renderScanlinesCompound(rasc, sl, slBin, renBase, alloc, styleHandler);
         
-        return fillsRendered;
+        return shape.paths();
+    }
+    
+    /**
+     * Style handler for compound rasterization.
+     * Maps fill style indices to colors (similar to test_styles in C++ version).
+     */
+    private static class TestStyles implements StyleHandler {
+        private final Rgba8[] solidColors;
+        
+        public TestStyles(Rgba8[] colors) {
+            this.solidColors = colors;
+        }
+        
+        @Override
+        public boolean isSolid(int style) {
+            return true;  // All styles are solid colors
+        }
+        
+        @Override
+        public Rgba8 color(int style) {
+            // Get color for this style (with bounds checking)
+            int colorIdx = style >= solidColors.length ? style % solidColors.length : style;
+            if (colorIdx < 0) colorIdx = 0;
+            return solidColors[colorIdx];
+        }
+        
+        @Override
+        public void generateSpan(Rgba8[] span, int x, int y, int len, int style) {
+            // Get color for this style (with bounds checking)
+            Rgba8 color = color(style);
+            
+            // Fill the span with the solid color
+            for (int i = 0; i < len; i++) {
+                if (i < span.length) {
+                    span[i] = new Rgba8(color.r, color.g, color.b, color.a);
+                }
+            }
+        }
     }
     
     /**

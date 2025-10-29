@@ -235,82 +235,136 @@ public class RasterizerCompoundAa {
     }
     
     public int sweepStyles() {
-        // Move to next scanline
-        while (true) {
+        for (;;) {
             if (scanY > outline.maxY()) {
                 return 0;
             }
             
             int numCells = outline.scanlineNumCells(scanY);
-            if (numCells > 0) {
-                break;
-            }
-            scanY++;
-        }
-        
-        // Clear Active Style Table and Mask
-        ast.clear();
-        Arrays.fill(asm, (byte) 0);
-        styles.clear();
-        cells.clear();
-        
-        // Get cells for this scanline
-        CellStyleAa[] scanlineCells = outline.scanlineCells(scanY);
-        int cellCount = outline.scanlineNumCells(scanY);
-        
-        // Build Active Style Table by collecting unique left/right fills
-        for (int i = 0; i < cellCount; i++) {
-            CellStyleAa cell = scanlineCells[i];
-            addStyle(cell.left);
-            addStyle(cell.right);
-        }
-        
-        int numStyles = ast.size();
-        if (numStyles == 0) {
-            scanY++;
-            return 0;
-        }
-        
-        // Sort styles if needed
-        if (layerOrder != LayerOrder.LAYER_UNSORTED) {
-            // Quick sort would go here - for now simple sort
-            ast.sort((a, b) -> layerOrder == LayerOrder.LAYER_DIRECT ? a - b : b - a);
-        }
-        
-        // Allocate style info for each unique style
-        for (int i = 0; i < numStyles; i++) {
-            styles.add(new StyleInfo());
-        }
-        
-        // Group cells by style
-        int startCell = 0;
-        for (int styleIdx = 0; styleIdx < numStyles; styleIdx++) {
-            int style = ast.get(styleIdx);
-            StyleInfo st = styles.get(styleIdx);
-            st.startCell = startCell;
-            st.numCells = 0;
-            st.lastX = Integer.MIN_VALUE;
+            CellStyleAa[] cellsArray = outline.scanlineCells(scanY);
+            int numStyles = maxStyle - minStyle + 2;
             
-            // Count cells for this style and add to cells array
-            for (int i = 0; i < cellCount; i++) {
-                CellStyleAa cell = scanlineCells[i];
+            // Allocate memory for cells (each cell can have two styles)
+            cells.clear();
+            cells.ensureCapacity(numCells * 2);
+            
+            // Ensure AST has enough capacity
+            ast.clear();
+            ast.ensureCapacity(numStyles);
+            
+            // Ensure ASM array is large enough
+            int byteSize = (numStyles + 7) >> 3;
+            if (asm.length < byteSize) {
+                asm = new byte[byteSize];
+            }
+            Arrays.fill(asm, (byte) 0);
+            
+            // Allocate styles array
+            styles.clear();
+            while (styles.size() < numStyles) {
+                styles.add(new StyleInfo());
+            }
+            
+            if (numCells > 0) {
+                // Pre-add zero (for no-fill style, that is, -1).
+                // We need that to ensure that the "-1 style" would go first.
+                asm[0] |= 1;
+                ast.add(0);
+                StyleInfo style = styles.get(0);
+                style.startCell = 0;
+                style.numCells = 0;
+                style.lastX = Integer.MIN_VALUE;
                 
-                if (cell.left == style || cell.right == style) {
-                    // This cell belongs to this style
-                    CellInfo ci = new CellInfo();
-                    ci.x = cell.x;
-                    ci.area = cell.area;
-                    ci.cover = cell.cover;
-                    cells.add(ci);
-                    st.numCells++;
+                slStart = cellsArray[0].x;
+                slLen = cellsArray[numCells - 1].x - slStart + 1;
+                
+                // First pass: collect unique styles and count cells per style
+                for (int i = 0; i < numCells; i++) {
+                    CellStyleAa currCell = cellsArray[i];
+                    addStyle(currCell.left);
+                    addStyle(currCell.right);
+                }
+                
+                // Convert the Y-histogram into the array of starting indexes
+                int startCell = 0;
+                for (int i = 0; i < ast.size(); i++) {
+                    StyleInfo st = styles.get(ast.get(i));
+                    int v = st.startCell;
+                    st.startCell = startCell;
+                    startCell += v;
+                }
+                
+                // Pre-allocate cells array
+                for (int i = 0; i < numCells * 2; i++) {
+                    cells.add(new CellInfo());
+                }
+                
+                // Second pass: populate cells array, processing left and right separately
+                for (int i = 0; i < numCells; i++) {
+                    CellStyleAa currCell = cellsArray[i];
+                    
+                    // Process left style
+                    int styleId = (currCell.left < 0) ? 0 : currCell.left - minStyle + 1;
+                    StyleInfo st = styles.get(styleId);
+                    
+                    if (currCell.x == st.lastX) {
+                        // Same x as previous cell for this style - accumulate
+                        CellInfo cell = cells.get(st.startCell + st.numCells - 1);
+                        cell.area += currCell.area;
+                        cell.cover += currCell.cover;
+                    } else {
+                        // New x position - create new cell
+                        CellInfo cell = cells.get(st.startCell + st.numCells);
+                        cell.x = currCell.x;
+                        cell.area = currCell.area;
+                        cell.cover = currCell.cover;
+                        st.lastX = currCell.x;
+                        st.numCells++;
+                    }
+                    
+                    // Process right style (with negated area/cover)
+                    styleId = (currCell.right < 0) ? 0 : currCell.right - minStyle + 1;
+                    st = styles.get(styleId);
+                    
+                    if (currCell.x == st.lastX) {
+                        // Same x as previous cell for this style - accumulate (negated)
+                        CellInfo cell = cells.get(st.startCell + st.numCells - 1);
+                        cell.area -= currCell.area;
+                        cell.cover -= currCell.cover;
+                    } else {
+                        // New x position - create new cell (negated)
+                        CellInfo cell = cells.get(st.startCell + st.numCells);
+                        cell.x = currCell.x;
+                        cell.area = -currCell.area;
+                        cell.cover = -currCell.cover;
+                        st.lastX = currCell.x;
+                        st.numCells++;
+                    }
                 }
             }
             
-            startCell += st.numCells;
+            if (ast.size() > 1) break;
+            scanY++;
         }
         
         scanY++;
-        return numStyles;
+        
+        // Sort styles if needed (excluding first element which is style 0 for -1)
+        if (layerOrder != LayerOrder.LAYER_UNSORTED && ast.size() > 2) {
+            // Sort elements from index 1 to end
+            ArrayList<Integer> toSort = new ArrayList<>(ast.subList(1, ast.size()));
+            if (layerOrder == LayerOrder.LAYER_DIRECT) {
+                toSort.sort((a, b) -> b - a);  // unsigned_greater
+            } else {
+                toSort.sort((a, b) -> a - b);  // unsigned_less
+            }
+            // Replace sorted portion
+            for (int i = 0; i < toSort.size(); i++) {
+                ast.set(i + 1, toSort.get(i));
+            }
+        }
+        
+        return ast.size() - 1;
     }
     
     public int scanlineStart() {
@@ -366,13 +420,8 @@ public class RasterizerCompoundAa {
         
         sl.resetSpans();
         
-        if (styleIdx < 0) {
-            styleIdx = 0;
-        } else {
-            styleIdx++;
-        }
-        
-        if (styleIdx >= styles.size()) {
+        // styleIdx is the index into the styles array (0-based)
+        if (styleIdx < 0 || styleIdx >= styles.size()) {
             return false;
         }
         

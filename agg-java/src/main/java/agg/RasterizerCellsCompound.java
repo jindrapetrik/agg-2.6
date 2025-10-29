@@ -207,7 +207,7 @@ public class RasterizerCellsCompound {
             int fx2 = fx1 + delta;
             int ex = x_from >> AggBasics.POLY_SUBPIXEL_SHIFT;
             
-            if (ey1 >= ey2) break;
+            if ((ey1 - ey2) * incr >= 0) break;
             
             int area_delta = (fx1 + fx2) * (first - fy1);
             currentCell.cover += (first - fy1) * incr;

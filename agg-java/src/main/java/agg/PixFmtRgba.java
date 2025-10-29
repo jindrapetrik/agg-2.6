@@ -27,7 +27,7 @@ public class PixFmtRgba {
     /**
      * Blend a horizontal span of pixels with solid color.
      */
-    public void blendSolidHSpan(int x, int y, int len, Rgba8 color, byte[] covers) {
+    public void blendSolidHSpan(int x, int y, int len, Rgba8 color, int[] covers) {
         if (y < 0 || y >= rbuf.height()) return;
         
         byte[] buffer = rbuf.buffer();
@@ -37,7 +37,7 @@ public class PixFmtRgba {
             int px = x + i;
             if (px >= 0 && px < rbuf.width()) {
                 int offset = y * stride + px * 4;
-                int cover = covers[i] & 0xFF;
+                int cover = covers[i];
                 
                 if (cover == 255) {
                     // Full coverage - direct copy

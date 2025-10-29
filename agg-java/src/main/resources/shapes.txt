@@ -1,0 +1,7 @@
+=======BeginShape
+Path 0 -1 -1 0 0
+Line 1000 1000
+Line 0 1000
+Line 0 0
+!======EndShape
+
