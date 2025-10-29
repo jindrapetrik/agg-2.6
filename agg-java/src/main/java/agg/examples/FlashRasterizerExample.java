@@ -140,8 +140,13 @@ public class FlashRasterizerExample {
         ras.autoClose(false);
         
         // Render each fill style from min to max
-        for (int s = shape.minStyle(); s <= shape.maxStyle(); s++) {
+        int minS = shape.minStyle();
+        int maxS = shape.maxStyle();
+        System.out.println("  Rendering fills from " + minS + " to " + maxS);
+        
+        for (int s = minS; s <= maxS; s++) {
             ras.reset();
+            int pathsAdded = 0;
             
             // For each path, check if it contributes to this fill style
             for (int i = 0; i < shape.paths(); i++) {
@@ -154,6 +159,8 @@ public class FlashRasterizerExample {
                     // If this path has the fill on the LEFT side, add it normally
                     if (style.leftFill == s) {
                         ras.addPath(trans, style.pathId);
+                        pathsAdded++;
+                        System.out.println("    Fill " + s + ": Added path " + i + " (leftFill)");
                     }
                     
                     // If this path has the fill on the RIGHT side, add it inverted
@@ -162,9 +169,13 @@ public class FlashRasterizerExample {
                         tmpPath.concatPath(trans, style.pathId);
                         tmpPath.invertPolygon(0);
                         ras.addPath(tmpPath, 0);
+                        pathsAdded++;
+                        System.out.println("    Fill " + s + ": Added path " + i + " (rightFill, inverted)");
                     }
                 }
             }
+            
+            System.out.println("    Fill " + s + ": Total paths added = " + pathsAdded);
             
             // Ensure fillIdx is within color array bounds
             int colorIdx = s >= colors.length ? s % colors.length : s;
