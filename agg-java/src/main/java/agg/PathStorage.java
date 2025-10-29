@@ -323,12 +323,39 @@ public class PathStorage implements VertexSource {
      * Invert polygon between start and end indices.
      * Direct translation of C++ AGG path_storage::invert_polygon(start, end).
      * 
+     * Before inversion, removes duplicate closing vertex if present (where last vertex
+     * equals first vertex), as explicit closing is common in Flash format but causes
+     * issues when paths are inverted with auto_close disabled.
+     * 
      * @param start starting index (inclusive)
      * @param end ending index (exclusive)
      */
     private void invertPolygon(int start, int end) {
         if (start >= end || start >= commands.size()) {
             return;
+        }
+        
+        // Check if the polygon has an explicit closing vertex (last == first)
+        // This is common in Flash format: "Line x y" back to starting point
+        if (end > start + 1) {
+            int firstVertIdx = start * 2;
+            int lastVertIdx = (end - 1) * 2;
+            
+            if (firstVertIdx + 1 < vertices.size() && lastVertIdx + 1 < vertices.size()) {
+                double firstX = vertices.get(firstVertIdx);
+                double firstY = vertices.get(firstVertIdx + 1);
+                double lastX = vertices.get(lastVertIdx);
+                double lastY = vertices.get(lastVertIdx + 1);
+                
+                // If first and last vertices are the same, remove the duplicate
+                if (Math.abs(firstX - lastX) < 1e-10 && Math.abs(firstY - lastY) < 1e-10) {
+                    // Remove the last command and its vertices
+                    commands.remove(end - 1);
+                    vertices.remove(lastVertIdx + 1);  // Remove Y
+                    vertices.remove(lastVertIdx);      // Remove X
+                    end--;  // Adjust end index
+                }
+            }
         }
         
         int tmpCmd = commands.get(start);
