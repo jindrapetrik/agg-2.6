@@ -21,3 +21,8 @@ buildNumber.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Flash rasterizer output files
+flash_rasterizer_output.ppm
+flash_rasterizer_output.png
+view_output.html

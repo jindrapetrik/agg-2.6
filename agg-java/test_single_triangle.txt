@@ -1,0 +1,7 @@
+=======BeginShape
+Path -1 0 -1 0 0
+Line 50 50
+Line 0 50
+Line 0 0
+<-------EndPath
+!======EndShape

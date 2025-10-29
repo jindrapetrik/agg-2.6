@@ -186,3 +186,39 @@ This is an ongoing translation project. Contributions are welcome for:
 - [Original AGG Website](http://www.antigrain.com) (historical)
 - [AGG on SourceForge](https://sourceforge.net/projects/agg/)
 - [GitHub Mirror](https://github.com/ghaerr/agg-2.6)
+
+## Examples
+
+### Flash Rasterizer Example
+
+A working Java translation of the `flash_rasterizer.cpp` example from the C++ AGG library.
+
+**Features:**
+- Reads Flash-style vector shapes from files
+- Parses compound shapes with fill and stroke styles  
+- Transforms and scales shapes to fit viewports
+- Renders shape vertices to image files
+- Exports to PPM and PNG formats
+
+**Run the example:**
+
+```bash
+# Compile
+mvn compile
+
+# Run flash rasterizer
+java -cp target/classes agg.examples.FlashRasterizerExample
+
+# Convert output to PNG
+java -cp target/classes agg.examples.PPMtoPNG flash_rasterizer_output.ppm flash_rasterizer_output.png
+```
+
+**Example Output:**
+
+Successfully loads and processes shapes from `shapes.txt`, rendering vertices as colored points:
+- 133 paths with 6,783 vertices
+- 655x520 pixel output
+- Each path rendered in a different random color
+
+See [FLASH_RASTERIZER_TRANSLATION.md](FLASH_RASTERIZER_TRANSLATION.md) for detailed translation notes.
+

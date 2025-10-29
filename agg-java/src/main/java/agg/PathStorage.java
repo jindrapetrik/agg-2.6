@@ -53,6 +53,25 @@ public class PathStorage implements VertexSource {
     }
     
     /**
+     * Start a new path.
+     * Returns the path ID which can be used to reference this path later.
+     * 
+     * @return path ID (index of current position)
+     */
+    public int startNewPath() {
+        if (!commands.isEmpty()) {
+            int lastCmd = commands.get(commands.size() - 1);
+            if (!isStop(lastCmd)) {
+                // Add stop command to end previous path
+                vertices.add(0.0);
+                vertices.add(0.0);
+                commands.add(PATH_CMD_STOP);
+            }
+        }
+        return commands.size();
+    }
+    
+    /**
      * Get total number of vertices.
      * 
      * @return vertex count
@@ -253,9 +272,122 @@ public class PathStorage implements VertexSource {
         }
     }
     
+    /**
+     * Concatenate path from another vertex source.
+     * The path is added as-is, preserving all commands.
+     * 
+     * @param vs vertex source
+     * @param pathId path identifier
+     */
+    public void concatPath(VertexSource vs, int pathId) {
+        vs.rewind(pathId);
+        double[] xy = new double[2];
+        int cmd;
+        while (!isStop(cmd = vs.vertex(xy))) {
+            vertices.add(xy[0]);
+            vertices.add(xy[1]);
+            commands.add(cmd);
+        }
+    }
+    
+    /**
+     * Invert (reverse) a polygon starting at the given index.
+     * This reverses the vertex order while preserving the path structure.
+     * Translates from C++ AGG path_storage::invert_polygon.
+     * 
+     * @param start starting index
+     */
+    public void invertPolygon(int start) {
+        // Skip all non-vertices at the beginning
+        while (start < commands.size() && !isVertex(commands.get(start))) {
+            start++;
+        }
+        
+        // Skip all insignificant move_to
+        while (start + 1 < commands.size() && 
+               isMoveTo(commands.get(start)) &&
+               isMoveTo(commands.get(start + 1))) {
+            start++;
+        }
+        
+        // Find the last vertex
+        int end = start + 1;
+        while (end < commands.size() && !isNextPoly(commands.get(end))) {
+            end++;
+        }
+        
+        invertPolygon(start, end);
+    }
+    
+    /**
+     * Invert polygon between start and end indices.
+     * Direct translation of C++ AGG path_storage::invert_polygon(start, end).
+     * 
+     * @param start starting index (inclusive)
+     * @param end ending index (exclusive)
+     */
+    private void invertPolygon(int start, int end) {
+        if (start >= end || start >= commands.size()) {
+            return;
+        }
+        
+        int tmpCmd = commands.get(start);
+        
+        end--; // Make "end" inclusive
+        
+        // Shift all commands to one position
+        for (int i = start; i < end && i < commands.size() - 1; i++) {
+            commands.set(i, commands.get(i + 1));
+        }
+        
+        // Assign starting command to the ending command
+        if (end < commands.size()) {
+            commands.set(end, tmpCmd);
+        }
+        
+        // Reverse the polygon vertices
+        while (end > start) {
+            swapVertices(start, end);
+            start++;
+            end--;
+        }
+    }
+    
+    /**
+     * Invert (reverse) vertices between start and end indices.
+     * The first vertex (MOVE_TO) stays in place, and the remaining vertices are reversed.
+     * 
+     * @param start starting index (inclusive)
+     * @param end ending index (exclusive)
+     */
+    
+    /**
+     * Swap two vertices at the given indices.
+     * 
+     * @param idx1 first vertex index
+     * @param idx2 second vertex index
+     */
+    private void swapVertices(int idx1, int idx2) {
+        if (idx1 >= commands.size() || idx2 >= commands.size()) {
+            return;
+        }
+        
+        int i1 = idx1 * 2;
+        int i2 = idx2 * 2;
+        
+        double tmpX = vertices.get(i1);
+        double tmpY = vertices.get(i1 + 1);
+        
+        vertices.set(i1, vertices.get(i2));
+        vertices.set(i1 + 1, vertices.get(i2 + 1));
+        
+        vertices.set(i2, tmpX);
+        vertices.set(i2 + 1, tmpY);
+    }
+    
     @Override
     public void rewind(int pathId) {
-        iteratorIndex = 0;
+        iteratorIndex = pathId;
     }
     
     @Override

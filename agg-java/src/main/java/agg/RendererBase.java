@@ -6,47 +6,33 @@ package agg;
  * Based on agg_renderer_base.h from the C++ AGG library.
  */
 public class RendererBase {
-    private int width;
-    private int height;
+    private PixFmtRgba pixf;
     
-    public RendererBase(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public RendererBase(PixFmtRgba pixf) {
+        this.pixf = pixf;
+    }
+    
+    public PixFmtRgba pixf() {
+        return pixf;
     }
     
     public int width() {
-        return width;
+        return pixf.width();
     }
     
     public int height() {
-        return height;
+        return pixf.height();
     }
     
     public void clear(Rgba8 color) {
-        // Clear the buffer with the specified color
+        pixf.rbuf().clear(color);
     }
     
-    public void copyPixel(int x, int y, Rgba8 color) {
-        // Copy pixel without blending
-    }
-    
-    public void blendPixel(int x, int y, Rgba8 color, int cover) {
-        // Blend pixel with coverage
-    }
-    
-    public void copyHLine(int x1, int y, int x2, Rgba8 color) {
-        // Draw horizontal line without blending
+    public void blendSolidHSpan(int x, int y, int len, Rgba8 color, byte[] covers) {
+        pixf.blendSolidHSpan(x, y, len, color, covers);
     }
     
     public void blendHLine(int x1, int y, int x2, Rgba8 color, int cover) {
-        // Draw horizontal line with blending
-    }
-    
-    public void copyVLine(int x, int y1, int y2, Rgba8 color) {
-        // Draw vertical line without blending
-    }
-    
-    public void blendVLine(int x, int y1, int y2, Rgba8 color, int cover) {
-        // Draw vertical line with blending
+        pixf.blendHLine(x1, y, x2, color, cover);
     }
 }
