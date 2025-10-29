@@ -13,12 +13,12 @@ public class ScanlineU8 {
     public static class Span {
         public int x;
         public int len;
-        public byte[] covers;
+        public int[] covers;
         
         public Span(int x, int len) {
             this.x = x;
             this.len = len;
-            this.covers = new byte[Math.abs(len)];
+            this.covers = new int[Math.abs(len)];
         }
     }
     

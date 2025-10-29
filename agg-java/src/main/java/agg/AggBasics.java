@@ -53,6 +53,12 @@ public final class AggBasics {
     public static final int POLY_SUBPIXEL_SCALE = 1 << POLY_SUBPIXEL_SHIFT;  // 256
     public static final int POLY_SUBPIXEL_MASK = POLY_SUBPIXEL_SCALE - 1;  // 255
     
+    // Filling rule enumeration
+    public enum FillingRule {
+        FILL_NON_ZERO,
+        FILL_EVEN_ODD
+    }
+    
     /**
      * Check if a path command is a vertex command.
      */
