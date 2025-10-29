@@ -110,4 +110,33 @@ public class PixFmtRgba {
             buffer[offset + 3] = (byte) (alpha + ((dstA * invAlpha + 255) >> 8));
         }
     }
+    
+    /**
+     * Public method to blend a single pixel with alpha coverage.
+     */
+    public void blendPixel(int x, int y, Rgba8 color, int alpha) {
+        if (x < 0 || x >= rbuf.width() || y < 0 || y >= rbuf.height()) return;
+        
+        byte[] buffer = rbuf.buffer();
+        int stride = rbuf.stride();
+        int offset = y * stride + x * 4;
+        
+        blendPixel(buffer, offset, color, alpha);
+    }
+    
+    /**
+     * Copy a pixel without blending.
+     */
+    public void copyPixel(int x, int y, Rgba8 color) {
+        if (x < 0 || x >= rbuf.width() || y < 0 || y >= rbuf.height()) return;
+        
+        byte[] buffer = rbuf.buffer();
+        int stride = rbuf.stride();
+        int offset = y * stride + x * 4;
+        
+        buffer[offset] = (byte) color.b;
+        buffer[offset + 1] = (byte) color.g;
+        buffer[offset + 2] = (byte) color.r;
+        buffer[offset + 3] = (byte) color.a;
+    }
 }

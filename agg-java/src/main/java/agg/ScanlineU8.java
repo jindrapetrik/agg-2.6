@@ -8,7 +8,7 @@ import java.util.List;
  * Used in rasterization to store spans of pixels with coverage information.
  * Based on agg_scanline_u.h from the C++ AGG library.
  */
-public class ScanlineU8 {
+public class ScanlineU8 implements Scanline {
     
     public static class Span {
         public int x;
@@ -58,9 +58,9 @@ public class ScanlineU8 {
         if (x == lastX + 1 && !spans.isEmpty()) {
             Span last = spans.get(spans.size() - 1);
             last.len++;
-            byte[] newCovers = new byte[last.len];
+            int[] newCovers = new int[last.len];
             System.arraycopy(last.covers, 0, newCovers, 0, last.covers.length);
-            newCovers[last.covers.length] = (byte) cover;
+            newCovers[last.covers.length] = cover;
             last.covers = newCovers;
         } else {
             addSpan(x, 1, cover);
@@ -72,7 +72,15 @@ public class ScanlineU8 {
         return y;
     }
     
+    public int getY() {
+        return y;
+    }
+    
     public void setY(int y) {
+        this.y = y;
+    }
+    
+    public void finalize(int y) {
         this.y = y;
     }
     
@@ -86,6 +94,14 @@ public class ScanlineU8 {
     
     public int numSpans() {
         return spans.size();
+    }
+    
+    public int getNumSpans() {
+        return spans.size();
+    }
+    
+    public Span getSpan(int i) {
+        return spans.get(i);
     }
     
     public List<Span> spans() {

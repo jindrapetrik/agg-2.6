@@ -35,4 +35,12 @@ public class RendererBase {
     public void blendHLine(int x1, int y, int x2, Rgba8 color, int cover) {
         pixf.blendHLine(x1, y, x2, color, cover);
     }
+    
+    public void blendPixel(int x, int y, Rgba8 color, int alpha) {
+        pixf.blendPixel(x, y, color, alpha);
+    }
+    
+    public void copyPixel(int x, int y, Rgba8 color) {
+        pixf.copyPixel(x, y, color);
+    }
 }
