@@ -73,9 +73,16 @@ public class RenderScanlinesCompound {
                         Rgba8[] mixColors = alloc.allocate(scanLen);
                         int[] coverageBuffer = new int[scanLen];
                         
-                        // Clear mix buffer
+                        // Clear mix buffer - ensure all entries have Rgba8 objects
                         for (int i = 0; i < scanLen; i++) {
-                            mixColors[i] = new Rgba8(0, 0, 0, 0);
+                            if (mixColors[i] == null) {
+                                mixColors[i] = new Rgba8(0, 0, 0, 0);
+                            } else {
+                                mixColors[i].r = 0;
+                                mixColors[i].g = 0;
+                                mixColors[i].b = 0;
+                                mixColors[i].a = 0;
+                            }
                             coverageBuffer[i] = 0;
                         }
                         
@@ -125,15 +132,23 @@ public class RenderScanlinesCompound {
                 for (int j = 0; j < len; j++) {
                     int alpha = covers[j];
                     if (alpha > 0) {
-                        Rgba8 color = colors[x - minX + j];
-                        renBase.blendPixel(x + j, y, color, alpha);
+                        int colorIdx = x - minX + j;
+                        // Bounds check
+                        if (colorIdx >= 0 && colorIdx < colors.length) {
+                            Rgba8 color = colors[colorIdx];
+                            renBase.blendPixel(x + j, y, color, alpha);
+                        }
                     }
                 }
             } else {
                 // Solid span
                 for (int j = 0; j < len; j++) {
-                    Rgba8 color = colors[x - minX + j];
-                    renBase.copyPixel(x + j, y, color);
+                    int colorIdx = x - minX + j;
+                    // Bounds check
+                    if (colorIdx >= 0 && colorIdx < colors.length) {
+                        Rgba8 color = colors[colorIdx];
+                        renBase.copyPixel(x + j, y, color);
+                    }
                 }
             }
         }
@@ -162,14 +177,26 @@ public class RenderScanlinesCompound {
                 int idx = x - minX + j;
                 int alpha = (covers != null) ? covers[j] : 255;
                 
+                // Bounds check to prevent array index out of bounds
+                if (idx < 0 || idx >= styleColors.length) {
+                    continue;
+                }
+                
                 if (alpha > 0) {
                     Rgba8 srcColor = styleColors[idx];
                     Rgba8 dstColor = mixColors[idx];
                     int prevCoverage = coverageBuffer[idx];
                     
                     if (prevCoverage == 0) {
-                        // First style at this pixel - direct write
-                        mixColors[idx] = new Rgba8(srcColor.r, srcColor.g, srcColor.b, alpha);
+                        // First style at this pixel - reuse existing object if possible
+                        if (mixColors[idx] == null) {
+                            mixColors[idx] = new Rgba8(srcColor.r, srcColor.g, srcColor.b, alpha);
+                        } else {
+                            mixColors[idx].r = srcColor.r;
+                            mixColors[idx].g = srcColor.g;
+                            mixColors[idx].b = srcColor.b;
+                            mixColors[idx].a = alpha;
+                        }
                     } else {
                         // Multiple styles overlap - blend
                         int newAlpha = alpha + prevCoverage - (alpha * prevCoverage) / 255;
@@ -180,7 +207,10 @@ public class RenderScanlinesCompound {
                             int g = (srcColor.g * alpha + dstColor.g * (255 - alpha)) / 255;
                             int b = (srcColor.b * alpha + dstColor.b * (255 - alpha)) / 255;
                             
-                            mixColors[idx] = new Rgba8(r, g, b, newAlpha);
+                            dstColor.r = r;
+                            dstColor.g = g;
+                            dstColor.b = b;
+                            dstColor.a = newAlpha;
                         }
                     }
                     

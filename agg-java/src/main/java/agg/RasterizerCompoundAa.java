@@ -267,6 +267,7 @@ public class RasterizerCompoundAa {
         
         int numStyles = ast.size();
         if (numStyles == 0) {
+            slStart = scanY;  // Set slStart even when no styles
             scanY++;
             return 0;
         }
