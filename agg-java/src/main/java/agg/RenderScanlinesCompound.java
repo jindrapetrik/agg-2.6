@@ -73,16 +73,12 @@ public class RenderScanlinesCompound {
                         Rgba8[] mixColors = alloc.allocate(scanLen);
                         int[] coverageBuffer = new int[scanLen];
                         
-                        // Clear mix buffer - ensure all entries have Rgba8 objects
+                        // Clear mix buffer - all entries already have Rgba8 objects from allocator
                         for (int i = 0; i < scanLen; i++) {
-                            if (mixColors[i] == null) {
-                                mixColors[i] = new Rgba8(0, 0, 0, 0);
-                            } else {
-                                mixColors[i].r = 0;
-                                mixColors[i].g = 0;
-                                mixColors[i].b = 0;
-                                mixColors[i].a = 0;
-                            }
+                            mixColors[i].r = 0;
+                            mixColors[i].g = 0;
+                            mixColors[i].b = 0;
+                            mixColors[i].a = 0;
                             coverageBuffer[i] = 0;
                         }
                         
@@ -188,28 +184,20 @@ public class RenderScanlinesCompound {
                     int prevCoverage = coverageBuffer[idx];
                     
                     if (prevCoverage == 0) {
-                        // First style at this pixel - reuse existing object if possible
-                        if (mixColors[idx] == null) {
-                            mixColors[idx] = new Rgba8(srcColor.r, srcColor.g, srcColor.b, alpha);
-                        } else {
-                            mixColors[idx].r = srcColor.r;
-                            mixColors[idx].g = srcColor.g;
-                            mixColors[idx].b = srcColor.b;
-                            mixColors[idx].a = alpha;
-                        }
+                        // First style at this pixel - direct write to existing object
+                        dstColor.r = srcColor.r;
+                        dstColor.g = srcColor.g;
+                        dstColor.b = srcColor.b;
+                        dstColor.a = alpha;
                     } else {
                         // Multiple styles overlap - blend
                         int newAlpha = alpha + prevCoverage - (alpha * prevCoverage) / 255;
                         
                         if (newAlpha > 0) {
                             // Alpha blend
-                            int r = (srcColor.r * alpha + dstColor.r * (255 - alpha)) / 255;
-                            int g = (srcColor.g * alpha + dstColor.g * (255 - alpha)) / 255;
-                            int b = (srcColor.b * alpha + dstColor.b * (255 - alpha)) / 255;
-                            
-                            dstColor.r = r;
-                            dstColor.g = g;
-                            dstColor.b = b;
+                            dstColor.r = (srcColor.r * alpha + dstColor.r * (255 - alpha)) / 255;
+                            dstColor.g = (srcColor.g * alpha + dstColor.g * (255 - alpha)) / 255;
+                            dstColor.b = (srcColor.b * alpha + dstColor.b * (255 - alpha)) / 255;
                             dstColor.a = newAlpha;
                         }
                     }
