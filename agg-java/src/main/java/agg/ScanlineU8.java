@@ -49,7 +49,7 @@ public class ScanlineU8 implements Scanline {
         if (len < 0) len = -len;
         Span span = new Span(x, len);
         for (int i = 0; i < len; i++) {
-            span.covers[i] = (byte) cover;
+            span.covers[i] = cover;
         }
         spans.add(span);
     }

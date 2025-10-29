@@ -32,17 +32,11 @@ public class RendererScanlineAaSolid {
             int x = span.x;
             int len = span.len;
             
-            if (len > 0) {
-                // Span with individual coverage values
-                // Convert int[] to byte[] for blendSolidHSpan
-                byte[] byteCovers = new byte[span.covers.length];
-                for (int i = 0; i < span.covers.length; i++) {
-                    byteCovers[i] = (byte) span.covers[i];
-                }
-                base.blendSolidHSpan(x, y, len, color, byteCovers);
+            if (len > 0) {                
+                base.blendSolidHSpan(x, y, len, color, span.covers);
             } else {
                 // Solid span with single coverage
-                base.blendHLine(x, y, x - len - 1, color, span.covers[0] & 0xFF);
+                base.blendHLine(x, y, x - len - 1, color, span.covers[0]);
             }
         }
     }

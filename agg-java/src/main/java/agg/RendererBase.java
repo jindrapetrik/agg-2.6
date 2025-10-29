@@ -28,7 +28,7 @@ public class RendererBase {
         pixf.rbuf().clear(color);
     }
     
-    public void blendSolidHSpan(int x, int y, int len, Rgba8 color, byte[] covers) {
+    public void blendSolidHSpan(int x, int y, int len, Rgba8 color, int[] covers) {
         pixf.blendSolidHSpan(x, y, len, color, covers);
     }
     
