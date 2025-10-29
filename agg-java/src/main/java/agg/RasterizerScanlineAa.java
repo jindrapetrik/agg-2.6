@@ -52,10 +52,16 @@ public class RasterizerScanlineAa {
     public void lineTo(int x, int y) {
         if (started) {
             cells.line(curX, curY, x, y);
+        } else {
+            // First LINE_TO without a preceding MOVE_TO is treated as an implicit MOVE_TO
+            // This matches C++ AGG behavior and is necessary for inverted paths
+            curX = x;
+            curY = y;
+            started = true;
+            return;
         }
         curX = x;
         curY = y;
-        started = true;
     }
     
     public void moveToD(double x, double y) {
