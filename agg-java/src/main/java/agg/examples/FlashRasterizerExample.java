@@ -172,14 +172,28 @@ public class FlashRasterizerExample {
         }
         
         @Override
-        public void generateSpan(Rgba8[] span, int x, int y, int len, int style) {
+        public boolean isSolid(int style) {
+            return true;  // All styles are solid colors
+        }
+        
+        @Override
+        public Rgba8 color(int style) {
             // Get color for this style (with bounds checking)
             int colorIdx = style >= solidColors.length ? style % solidColors.length : style;
-            Rgba8 color = solidColors[colorIdx];
+            if (colorIdx < 0) colorIdx = 0;
+            return solidColors[colorIdx];
+        }
+        
+        @Override
+        public void generateSpan(Rgba8[] span, int x, int y, int len, int style) {
+            // Get color for this style (with bounds checking)
+            Rgba8 color = color(style);
             
             // Fill the span with the solid color
             for (int i = 0; i < len; i++) {
-                span[i] = new Rgba8(color.r, color.g, color.b, color.a);
+                if (i < span.length) {
+                    span[i] = new Rgba8(color.r, color.g, color.b, color.a);
+                }
             }
         }
     }
